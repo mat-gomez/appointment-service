@@ -11,7 +11,8 @@ import org.springframework.test.context.TestPropertySource;
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
 		"spring.flyway.enabled=false",
-		"spring.security.oauth2.resourceserver.jwt.issuer-uri=https://dummy-issuer.com"
+		"spring.security.oauth2.resourceserver.jwt.issuer-uri=https://dummy-issuer.com",
+		"spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class AppointmentServiceApplicationTests {
 
