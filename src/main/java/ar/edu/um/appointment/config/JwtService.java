@@ -23,8 +23,8 @@ public class JwtService {
             return Collections.emptyList();
         }
         Object roles = jwt.getClaim("roles");
-        if (roles instanceof Collection<?>) {
-            return ((Collection<?>) roles).stream()
+        if (roles instanceof Collection<?> collection) {
+            return collection.stream()
                     .map(Object::toString)
                     .toList();
         }
