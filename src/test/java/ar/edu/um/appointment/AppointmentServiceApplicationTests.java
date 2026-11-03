@@ -10,7 +10,8 @@ import org.springframework.test.context.TestPropertySource;
 		"spring.datasource.driver-class-name=org.h2.Driver",
 		"spring.datasource.username=sa",
 		"spring.datasource.password=",
-		"spring.flyway.enabled=false"
+		"spring.flyway.enabled=false",
+		"spring.security.oauth2.resourceserver.jwt.issuer-uri=https://dummy-issuer.com"
 })
 class AppointmentServiceApplicationTests {
 
