@@ -1,47 +1,35 @@
 server:
-  port: ${SERVER_PORT:8082}
+  port: 8081
 
 spring:
   application:
     name: appointment-service
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5434}/${DB_NAME:appointment_db}
-    username: ${DB_USER:appointment_user}
-    password: ${DB_PASSWORD:appointment_pass}
+    url: jdbc:postgresql://localhost:5434/appointment_db
+    username: appointment_user
+    password: appointment_pass
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: false
+      ddl-auto: validate
+    show-sql: true
     properties:
       hibernate:
-        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:172.17.201.1:9094}
+    consumer:
+      group-id: ${KAFKA_GROUP_ID:alumnos-proyecto-turnos}
   data:
     redis:
-      host: ${CATEDRA_REDIS_HOST:172.17.201.1}
-      port: ${CATEDRA_REDIS_PORT:6379}
-      username: ${CATEDRA_REDIS_USER:}
-      password: ${CATEDRA_REDIS_PASSWORD:}
-  kafka:
-    bootstrap-servers: ${CATEDRA_KAFKA_SERVERS:172.17.201.1:9094}
-    consumer:
-      group-id: ${CATEDRA_KAFKA_GROUP:alumnos-proyecto-melina-gomez}
-      auto-offset-reset: earliest
-      enable-auto-commit: false
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      host: ${REDIS_HOST:172.17.201.1}
+      port: ${REDIS_PORT:6379}
+      username: ${REDIS_USERNAME:}
+      password: ${REDIS_PASSWORD:}
 
-catalog-service:
-  base-url: ${CATALOG_SERVICE_URL:http://localhost:8081}
-
-catedra:
-  group-id: ${CATEDRA_GROUP_ID:proyecto-melina-gomez}
-  api:
-    base-url: ${CATEDRA_API_URL:http://172.17.201.1:8090}
-    jwt-token: ${CATEDRA_JWT_TOKEN:}
-  kafka:
-    appointment-actions-topic: ${CATEDRA_APPOINTMENT_ACTIONS_TOPIC:alumnos.turnos.acciones.proyecto-melina-gomez}
-    appointment-phone-topic: ${CATEDRA_APPOINTMENT_PHONE_TOPIC:catedra.turnos.telefono.proyecto-melina-gomez}
+jwt:
+  secret: ${JWT_SECRET:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0c3VyaSI...cambiar-por-un-secreto-muy-seguro-y-largo-en-produccion}
+  expiration: 31536000000
