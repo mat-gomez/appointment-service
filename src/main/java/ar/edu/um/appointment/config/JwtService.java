@@ -19,7 +19,7 @@ public class JwtService {
 
     @SuppressWarnings("unchecked")
     public List<String> extractAuthorities(Jwt jwt) {
-        if (jwt == null || jwt.getClaims() == null) {
+        if (jwt == null) {
             return Collections.emptyList();
         }
         Object roles = jwt.getClaim("roles");
