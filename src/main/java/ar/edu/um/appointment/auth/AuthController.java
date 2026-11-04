@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final TokenProvider tokenProvider;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequestDTO request) {
@@ -28,21 +32,29 @@ public class AuthController {
     @PostMapping("/authenticate")
     public ResponseEntity<JWTTokenDTO> authorize(@Valid @RequestBody LoginRequestDTO request) {
         UserEntity user = authService.authenticate(request.getUsername(), request.getPassword());
-        // Simulación
-        String jwt = "dummy-jwt-token-for-" + user.getUsername();
+
+        String jwt = tokenProvider.createToken(user);
+
         return ResponseEntity.ok(new JWTTokenDTO(jwt));
     }
 
     @GetMapping("/account")
-    public ResponseEntity<AccountDTO> getAccount() {
+    public ResponseEntity<AccountDTO> getAccount(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = jwt.getSubject();
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("USER_NOT_FOUND"));
+
         AccountDTO account = AccountDTO.builder()
-                .login("melina")
-                .email("mat.gomez@alumno.um.edu.ar")
-                .firstName("Melina")
-                .lastName("Gomez Torres")
-                .activated(true)
-                .authorities(java.util.Set.of("ROLE_USER"))
+                .login(user.getUsername())
+                .email(user.getEmail())
+                .activated(user.isActivated())
+                .authorities(user.getAuthorities())
                 .build();
+
         return ResponseEntity.ok(account);
     }
 }

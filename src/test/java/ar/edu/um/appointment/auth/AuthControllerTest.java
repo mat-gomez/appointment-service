@@ -16,6 +16,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.Optional;
+import java.util.Set;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -43,6 +47,12 @@ class AuthControllerTest {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private TokenProvider tokenProvider;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -51,7 +61,7 @@ class AuthControllerTest {
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
-        Mockito.reset(authService);
+        Mockito.reset(authService, tokenProvider, userRepository);
     }
 
     @TestConfiguration
@@ -60,6 +70,18 @@ class AuthControllerTest {
         @Primary
         public AuthService authServiceMock() {
             return Mockito.mock(AuthService.class);
+        }
+
+        @Bean
+        @Primary
+        public TokenProvider tokenProviderMock() {
+            return Mockito.mock(TokenProvider.class);
+        }
+
+        @Bean
+        @Primary
+        public UserRepository userRepositoryMock() {
+            return Mockito.mock(UserRepository.class);
         }
     }
 
@@ -84,19 +106,31 @@ class AuthControllerTest {
 
         UserEntity mockUser = UserEntity.builder().username("melina").build();
         when(authService.authenticate(anyString(), anyString())).thenReturn(mockUser);
+        when(tokenProvider.createToken(any(UserEntity.class))).thenReturn("mocked-jwt-token");
 
         mockMvc.perform(post("/api/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.idToken").exists());
+                .andExpect(jsonPath("$.idToken").value("mocked-jwt-token"));
     }
 
     @Test
-    @WithMockUser
     void getAccount_ShouldReturnAccountDetails() throws Exception {
-        mockMvc.perform(get("/api/account"))
+        UserEntity mockUser = UserEntity.builder()
+                .username("melina")
+                .email("mat.gomez@alumno.um.edu.ar")
+                .activated(true)
+                .authorities(Set.of("ROLE_USER"))
+                .build();
+
+        when(userRepository.findByUsername("melina")).thenReturn(Optional.of(mockUser));
+
+        mockMvc.perform(get("/api/account")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt()
+                                .jwt(jwt -> jwt.subject("melina"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.login").value("melina"));
+                .andExpect(jsonPath("$.login").value("melina"))
+                .andExpect(jsonPath("$.email").value("mat.gomez@alumno.um.edu.ar"));
     }
 }
