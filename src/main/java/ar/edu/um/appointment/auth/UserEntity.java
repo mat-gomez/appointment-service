@@ -27,6 +27,7 @@ public class UserEntity {
     @Column(name = "password_hash", nullable = false, length = 60)
     private String password;
 
+    @Builder.Default
     @Column(name = "activated", nullable = false)
     private boolean activated = true;
 
