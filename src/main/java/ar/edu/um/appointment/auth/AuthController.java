@@ -22,9 +22,7 @@ public class AuthController {
         authService.registerUser(
                 request.getLogin(),
                 request.getEmail(),
-                request.getPassword(),
-                request.getFirstName(),
-                request.getLastName()
+                request.getPassword()
         );
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

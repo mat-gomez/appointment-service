@@ -17,7 +17,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserEntity registerUser(String username, String email, String rawPassword, String firstName, String lastName) {
+    public UserEntity registerUser(String username, String email, String rawPassword) {
         if (userRepository.existsByUsername(username)) {
             throw new DomainException("USERNAME_ALREADY_EXISTS", HttpStatus.BAD_REQUEST, "Username already used");
         }

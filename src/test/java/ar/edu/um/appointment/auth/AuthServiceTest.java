@@ -34,7 +34,7 @@ class AuthServiceTest {
         when(passwordEncoder.encode("password123")).thenReturn("encoded_pass");
         when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        UserEntity result = authService.registerUser("newuser", "new@um.edu.ar", "password123", "Juan", "Perez");
+        UserEntity result = authService.registerUser("newuser", "new@um.edu.ar", "password123");
 
         assertNotNull(result);
         assertEquals("newuser", result.getUsername());
@@ -47,7 +47,7 @@ class AuthServiceTest {
         when(userRepository.existsByUsername("existing")).thenReturn(true);
 
         Exception exception = assertThrows(RuntimeException.class, () ->
-                authService.registerUser("existing", "new@um.edu.ar", "password123", "Juan", "Perez")
+                authService.registerUser("existing", "new@um.edu.ar", "password123")
         );
 
         assertEquals("USERNAME_ALREADY_EXISTS", exception.getMessage());
@@ -60,7 +60,7 @@ class AuthServiceTest {
         when(userRepository.existsByEmail("existing@um.edu.ar")).thenReturn(true);
 
         Exception exception = assertThrows(RuntimeException.class, () ->
-                authService.registerUser("newuser", "existing@um.edu.ar", "password123", "Juan", "Perez")
+                authService.registerUser("newuser", "existing@um.edu.ar", "password123")
         );
 
         assertEquals("EMAIL_ALREADY_EXISTS", exception.getMessage());
