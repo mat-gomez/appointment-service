@@ -39,12 +39,13 @@ public class ReservationEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        java.time.ZoneId zone = java.time.ZoneId.systemDefault();
+        this.createdAt = LocalDateTime.now(zone);
+        this.updatedAt = LocalDateTime.now(zone);
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
     }
 }

@@ -26,7 +26,7 @@ class ReservationRepositoryTest {
                 .status(ReservationStatus.HOLD_CREATED)
                 .build();
 
-        ReservationEntity saved = reservationRepository.save(entity);
+        reservationRepository.save(entity);
 
         Optional<ReservationEntity> found = reservationRepository.findByReservationId("res-12345");
 

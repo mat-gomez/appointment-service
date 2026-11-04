@@ -27,4 +27,10 @@ class ReservationStateHelperTest {
         assertThat(stateHelper.canTransition(ReservationStatus.HOLD_CREATED, ReservationStatus.WAITING_FOR_PHONE)).isTrue();
         assertThat(stateHelper.canTransition(ReservationStatus.WAITING_FOR_PHONE, ReservationStatus.CONFIRMED)).isTrue();
     }
+
+    @Test
+    void shouldHandleNullCurrentState() {
+        assertThat(stateHelper.canTransition(null, ReservationStatus.HOLD_CREATED)).isTrue();
+        assertThat(stateHelper.canTransition(null, ReservationStatus.CONFIRMED)).isFalse();
+    }
 }

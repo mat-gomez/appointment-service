@@ -20,10 +20,6 @@ public class ReservationStateHelper {
             return targetState == ReservationStatus.HOLD_CREATED;
         }
 
-        if (FINAL_STATES.contains(currentState)) {
-            return false;
-        }
-
-        return true;
+        return !FINAL_STATES.contains(currentState);
     }
 }

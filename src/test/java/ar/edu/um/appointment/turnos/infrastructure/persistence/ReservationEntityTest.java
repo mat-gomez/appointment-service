@@ -27,7 +27,6 @@ class ReservationEntityTest {
     void shouldUpdateTimestampOnPreUpdate() {
         ReservationEntity entity = new ReservationEntity();
         entity.onCreate();
-        LocalDateTime initialUpdated = entity.getUpdatedAt();
 
         entity.onUpdate();
 

@@ -27,7 +27,7 @@ public class ProcessedEventEntity {
     @PrePersist
     protected void onCreate() {
         if (this.processedAt == null) {
-            this.processedAt = LocalDateTime.now();
+            this.processedAt = LocalDateTime.now(java.time.ZoneId.systemDefault());
         }
     }
 }
