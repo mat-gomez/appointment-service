@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -23,8 +24,8 @@ public class TokenProvider {
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
 
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpiration);
+        Instant now = Instant.now();
+        Instant expiryDate = now.plusMillis(jwtExpiration);
 
         var authorities = user.getAuthorities().stream()
                 .collect(Collectors.toList());
@@ -32,8 +33,8 @@ public class TokenProvider {
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim("roles", authorities)
-                .issuedAt(now)
-                .expiration(expiryDate)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiryDate))
                 .signWith(key, Jwts.SIG.HS512)
                 .compact();
     }
