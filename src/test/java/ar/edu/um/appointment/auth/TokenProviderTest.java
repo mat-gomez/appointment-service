@@ -36,6 +36,6 @@ class TokenProviderTest {
 
         assertNotNull(token);
         assertFalse(token.isEmpty());
-        assertTrue(token.split("\\.").length == 3, "Un JWT válido debe tener 3 partes separadas por puntos");
+        assertEquals(3, token.split("\\.").length, "Un JWT válido debe tener 3 partes separadas por puntos");
     }
 }

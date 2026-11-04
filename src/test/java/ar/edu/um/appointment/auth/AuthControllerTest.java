@@ -10,7 +10,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -21,6 +20,7 @@ import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -69,19 +69,19 @@ class AuthControllerTest {
         @Bean
         @Primary
         public AuthService authServiceMock() {
-            return Mockito.mock(AuthService.class);
+            return mock(AuthService.class);
         }
 
         @Bean
         @Primary
         public TokenProvider tokenProviderMock() {
-            return Mockito.mock(TokenProvider.class);
+            return mock(TokenProvider.class);
         }
 
         @Bean
         @Primary
         public UserRepository userRepositoryMock() {
-            return Mockito.mock(UserRepository.class);
+            return mock(UserRepository.class);
         }
     }
 
