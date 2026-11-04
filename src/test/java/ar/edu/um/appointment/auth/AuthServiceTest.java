@@ -38,7 +38,13 @@ class AuthServiceTest {
 
         assertNotNull(result);
         assertEquals("newuser", result.getUsername());
+        assertEquals("new@um.edu.ar", result.getEmail());
         assertEquals("encoded_pass", result.getPassword());
+        assertTrue(result.isActivated());
+        assertNotNull(result.getAuthorities());
+        assertFalse(result.getAuthorities().isEmpty());
+        assertTrue(result.getAuthorities().contains("ROLE_USER"));
+
         verify(userRepository, times(1)).save(any(UserEntity.class));
     }
 
