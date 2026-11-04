@@ -12,6 +12,8 @@ import org.springframework.web.client.RestClientException;
 @RequiredArgsConstructor
 public class CatedraAppointmentsClient {
 
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     private final RestClient catedraRestClient;
 
     private String getAuthHeader(String technicalToken) {
@@ -22,7 +24,7 @@ public class CatedraAppointmentsClient {
         try {
             return catedraRestClient.get()
                     .uri("/api/appointment-occupancies?professionalId={id}", professionalId)
-                    .header("Authorization", getAuthHeader(technicalToken))
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
                     .body(Object.class);
@@ -39,7 +41,7 @@ public class CatedraAppointmentsClient {
         try {
             return catedraRestClient.post()
                     .uri("/api/appointment-holds")
-                    .header("Authorization", getAuthHeader(technicalToken))
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
                     .body(holdRequest)
@@ -58,7 +60,7 @@ public class CatedraAppointmentsClient {
         try {
             return catedraRestClient.post()
                     .uri("/api/appointments/{id}/confirm", appointmentId)
-                    .header("Authorization", getAuthHeader(technicalToken))
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
                     .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
                     .retrieve()
                     .body(Object.class);
@@ -75,7 +77,7 @@ public class CatedraAppointmentsClient {
         try {
             return catedraRestClient.post()
                     .uri("/api/appointments")
-                    .header("Authorization", getAuthHeader(technicalToken))
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
                     .body(appointmentRequest)
@@ -94,7 +96,7 @@ public class CatedraAppointmentsClient {
         try {
             catedraRestClient.delete()
                     .uri("/api/appointments/{id}/cancel", appointmentId)
-                    .header("Authorization", getAuthHeader(technicalToken))
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
                     .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
                     .retrieve()
                     .toBodilessEntity();
