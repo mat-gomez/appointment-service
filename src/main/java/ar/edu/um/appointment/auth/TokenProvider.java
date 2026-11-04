@@ -20,6 +20,7 @@ public class TokenProvider {
     @Value("${jwt.expiration:31536000000}")
     private long jwtExpiration;
 
+    @SuppressWarnings("java:S5738")
     public String createToken(UserEntity user) {
         byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
         SecretKey key = Keys.hmacShaKeyFor(keyBytes);
