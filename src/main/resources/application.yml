@@ -11,7 +11,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -19,6 +19,9 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    clean-disabled: false
+    clean-at-start: true
+    locations: classpath:db/migration
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS:172.17.201.1:9094}
     consumer:
@@ -31,5 +34,5 @@ spring:
       password: ${REDIS_PASSWORD:}
 
 jwt:
-  secret: ${JWT_SECRET:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0c3VyaSI...cambiar-por-un-secreto-muy-seguro-y-largo-en-produccion}
+  secret: ${JWT_SECRET:defaultSecretKeyForTestingPurposesWithAtLeast512BitsLengthHereToSatisfyJJWTRequirementsForHS512AlgorithmAndProductionUse}
   expiration: 31536000000
