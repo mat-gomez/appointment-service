@@ -3,19 +3,19 @@
 
 > Documento **generado automáticamente** por la cátedra de Programación II (UM): RepoSense + análisis de calidad de **7 dimensiones**. **No editar a mano**: se regenera en cada evaluación.
 > Rama evaluada: `main`. Análisis **heurístico** (regex + métricas) + build: es una criba para orientar la revisión, **no una nota**. La **documentación** del repositorio no se evalúa.
-> Generado: 2026-11-12.
+> Generado: 2026-11-17.
 
 ## 1. Veredicto
 
 | Aspecto | Resultado |
 |---|---|
-| Índice de calidad | **52/100** |
+| Índice de calidad | **53/100** |
 | Tipo de repositorio | `backend` |
 | Build (`mvnw verify` / `gradlew check`) | no compila |
 | Código (LOC) | 1,580 |
 | Archivos de código | 48 |
 | Clases | 49 |
-| Código dentro de clases (%POO) | 75% |
+| Código dentro de clases (%POO) | 73% |
 | Funciones fuera de clases | 0 |
 | Duplicación (puerta) | 6.6% |
 | Duplicación lógica | 7.2% |
@@ -51,7 +51,7 @@ Cada dimensión indica **qué mide**, **por qué importa** y **tu resultado**. C
 
 | Dimensión | Peso | Puntaje |
 |:--|--:|--:|
-| **D1** Diseño OO, SOLID y patrones (20%) | 20% | 10 |
+| **D1** Diseño OO, SOLID y patrones (20%) | 20% | 14 |
 | **D2** Arquitectura hexagonal — backend (15%) | 15% | 55 |
 | **D3** Frontend KMP: MVVM y buenas prácticas (10%) | 10% | N/A |
 | **D4** Integración y contrato (10%) | 10% | 40 |
@@ -63,7 +63,7 @@ Cada dimensión indica **qué mide**, **por qué importa** y **tu resultado**. C
 
 - **Qué mide:** Métricas orientadas a objetos (clases, métodos, campos, cohesión, acoplamiento, herencia) y proxies de SOLID, más patrones de diseño.
 - **Por qué importa:** El eje de la materia es el buen uso de la POO y su arquitectura: un diseño con clases claras y poco acopladas es más fácil de entender, probar y cambiar.
-- **Tu resultado:** **10/100**
+- **Tu resultado:** **14/100**
 - **Para investigar la causa:**
     - ¿Se pensó el modelo de clases antes de codificar o se agrupó después?
     - ¿Qué clases concentran muchas responsabilidades a la vez?
@@ -115,17 +115,7 @@ Cada dimensión indica **qué mide**, **por qué importa** y **tu resultado**. C
 
 El análisis encontró las siguientes señales (archivo, sin número de línea a propósito):
 
-**SRP/responsabilidad** (8)
-- clase 'RegisterRequestDTO' sin métodos (7 campos): solo datos — `src/main/java/ar/edu/um/appointment/auth/RegisterRequestDTO.java`
-- clase 'UserEntity' sin métodos (6 campos): solo datos — `src/main/java/ar/edu/um/appointment/auth/UserEntity.java`
-- clase 'LoginRequestDTO' sin métodos (3 campos): solo datos — `src/main/java/ar/edu/um/appointment/auth/LoginRequestDTO.java`
-- clase 'AccountDTO' grande (LOC=10, métodos=0, campos=8) — `src/main/java/ar/edu/um/appointment/auth/AccountDTO.java`
-- clase 'AccountDTO' sin métodos (8 campos): solo datos — `src/main/java/ar/edu/um/appointment/auth/AccountDTO.java`
-- clase 'ReservationProcess' con baja cohesión (29%) — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java`
-- método 'ReservationProcess.ReservationProcess' con 6 parámetros — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java`
-- clase 'AuthControllerTest' con baja cohesión (29%) — `src/test/java/ar/edu/um/appointment/auth/AuthControllerTest.java`
-
-**DIP/concretos** (19)
+**DIP/concretos** (10)
 - clase 'AuthController' muy acoplada (CBO=15) — `src/main/java/ar/edu/um/appointment/auth/AuthController.java`
 - clase 'TokenProvider' muy acoplada (CBO=10) — `src/main/java/ar/edu/um/appointment/auth/TokenProvider.java`
 - clase 'AuthService' muy acoplada (CBO=14) — `src/main/java/ar/edu/um/appointment/auth/AuthService.java`
@@ -136,15 +126,11 @@ El análisis encontró las siguientes señales (archivo, sin número de línea a
 - clase 'CatedraAppointmentsClient' muy acoplada (CBO=12) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java`
 - clase 'CatedraAppointmentsClient' instancia 5 concretos (CBO=12) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java`
 - clase 'GlobalExceptionHandler' muy acoplada (CBO=8) — `src/main/java/ar/edu/um/appointment/web/errors/GlobalExceptionHandler.java`
-- clase 'AuthControllerTest' muy acoplada (CBO=15) — `src/test/java/ar/edu/um/appointment/auth/AuthControllerTest.java`
-- clase 'AuthControllerTest' instancia 3 concretos (CBO=15) — `src/test/java/ar/edu/um/appointment/auth/AuthControllerTest.java`
-- clase 'AuthServiceTest' muy acoplada (CBO=9) — `src/test/java/ar/edu/um/appointment/auth/AuthServiceTest.java`
-- clase 'ReservationStateHelperTest' muy acoplada (CBO=8) — `src/test/java/ar/edu/um/appointment/turnos/infrastructure/persistence/ReservationStateHelperTest.java`
-- clase 'ReservationStatusTest' muy acoplada (CBO=8) — `src/test/java/ar/edu/um/appointment/turnos/infrastructure/persistence/ReservationStatusTest.java`
-- clase 'CatedraAppointmentsClientTest' muy acoplada (CBO=14) — `src/test/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClientTest.java`
-- clase 'CatalogServiceClientTest' muy acoplada (CBO=12) — `src/test/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClientTest.java`
-- clase 'GlobalExceptionHandlerTest' muy acoplada (CBO=10) — `src/test/java/ar/edu/um/appointment/web/errors/GlobalExceptionHandlerTest.java`
-- clase 'GlobalExceptionHandlerTest' instancia 3 concretos (CBO=10) — `src/test/java/ar/edu/um/appointment/web/errors/GlobalExceptionHandlerTest.java`
+
+**SRP/responsabilidad** (3)
+- clase 'AccountDTO' grande (LOC=10, métodos=0, campos=8) — `src/main/java/ar/edu/um/appointment/auth/AccountDTO.java`
+- clase 'ReservationProcess' con baja cohesión (29%) — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java`
+- método 'ReservationProcess.ReservationProcess' con 6 parámetros — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java`
 
 **OCP/type-switch** (1)
 - clase 'JwtService' con 1 type-checks — `src/main/java/ar/edu/um/appointment/config/JwtService.java`
@@ -169,20 +155,20 @@ xychart-beta
     title "Índice de calidad a lo largo de los commits"
     x-axis ["dcbe314", "b6638cc", "8c15fb5", "7cb93de", "0c124b6", "c21f5b9", "86aca7a", "fe616da", "a8c6694"]
     y-axis "Índice" 0 --> 100
-    line [0, 15, 35, 42, 41, 46, 49, 51, 55]
+    line [0, 15, 33, 40, 39, 44, 49, 52, 56]
 ```
 
 | # | Fecha | Commit | Autor | LOC | Índice | %POO | Duplic. | Sueltas |
 |---|---|---|---|---:|---:|---:|---:|---:|
 | 1 | 2026-09-06 | `dcbe314` | Melina Abril Gomez Torres | 0 | 0 | 0% | 0.0% | 0 |
 | 2 | 2026-09-10 | `b6638cc` | Ing. Daniel Quinteros | 0 | 15 | 0% | 0.0% | 0 |
-| 3 | 2026-10-15 | `8c15fb5` | Melina Abril Gomez Torres | 18 | 35 | 56% | 0.0% | 0 |
-| 4 | 2026-10-30 | `7cb93de` | Melina Abril Gomez Torres | 18 | 42 | 56% | 0.0% | 0 |
-| 5 | 2026-11-03 | `0c124b6` | Melina Abril Gomez Torres | 79 | 41 | 82% | 0.0% | 0 |
-| 6 | 2026-11-03 | `c21f5b9` | Melina Abril Gomez Torres | 87 | 46 | 75% | 0.0% | 0 |
+| 3 | 2026-10-15 | `8c15fb5` | Melina Abril Gomez Torres | 18 | 33 | 56% | 0.0% | 0 |
+| 4 | 2026-10-30 | `7cb93de` | Melina Abril Gomez Torres | 18 | 40 | 56% | 0.0% | 0 |
+| 5 | 2026-11-03 | `0c124b6` | Melina Abril Gomez Torres | 79 | 39 | 87% | 0.0% | 0 |
+| 6 | 2026-11-03 | `c21f5b9` | Melina Abril Gomez Torres | 87 | 44 | 87% | 0.0% | 0 |
 | 7 | 2026-11-03 | `86aca7a` | Melina Abril Gomez Torres | 316 | 49 | 76% | 0.0% | 0 |
-| 8 | 2026-11-04 | `fe616da` | Melina Abril Gomez Torres | 1,002 | 51 | 73% | 2.4% | 0 |
-| 9 | 2026-11-04 | `a8c6694` | Melina Abril Gomez Torres | 1,580 | 55 | 75% | 6.6% | 0 |
+| 8 | 2026-11-04 | `fe616da` | Melina Abril Gomez Torres | 1,002 | 52 | 70% | 2.4% | 0 |
+| 9 | 2026-11-04 | `a8c6694` | Melina Abril Gomez Torres | 1,580 | 56 | 73% | 6.6% | 0 |
 
 ---
 _Informe generado por la cátedra. Las dimensiones y umbrales corresponden a `calidad.py` (perfil `exigente`); el semáforo, a `CRITERIOS-CALIDAD.md`. La documentación del repositorio no se evalúa. Ante dudas, revisá el archivo señalado._
