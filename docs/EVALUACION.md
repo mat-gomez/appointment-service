@@ -3,13 +3,13 @@
 
 > Documento **generado automáticamente** por la cátedra de Programación II (UM): RepoSense + análisis de calidad de **7 dimensiones**. **No editar a mano**: se regenera en cada evaluación.
 > Rama evaluada: `main`. Análisis **heurístico** (regex + métricas) + build: es una criba para orientar la revisión, **no una nota**. La **documentación** del repositorio no se evalúa.
-> Generado: 2026-11-17.
+> Generado: 2026-11-18.
 
 ## 1. Veredicto
 
 | Aspecto | Resultado |
 |---|---|
-| Índice de calidad | **53/100** |
+| Índice de calidad | **54/100** |
 | Tipo de repositorio | `backend` |
 | Build (`mvnw verify` / `gradlew check`) | no compila |
 | Código (LOC) | 1,580 |
@@ -31,11 +31,11 @@ Criterios de la cátedra (`CRITERIOS-CALIDAD.md`): **Aprobar** se juega con el p
 | Semáforo | Resultado |
 |---|---|
 | Aprobar (`estandar`) | **no cumple** — 5/11 |
-| Destacar (`exigente`) | **no cumple** — 3/11 |
+| Destacar (`exigente`) | **no cumple** — 4/11 |
 
 **Para aprobar, falta cumplir:** Duplicación; Tests
 
-**Para destacar, falta cumplir:** SOLID; POO; Duplicación; Tests
+**Para destacar, falta cumplir:** POO; Duplicación; Tests
 
 ## 3. Autoría (RepoSense)
 
@@ -51,7 +51,7 @@ Cada dimensión indica **qué mide**, **por qué importa** y **tu resultado**. C
 
 | Dimensión | Peso | Puntaje |
 |:--|--:|--:|
-| **D1** Diseño OO, SOLID y patrones (20%) | 20% | 14 |
+| **D1** Diseño OO, SOLID y patrones (20%) | 20% | 16 |
 | **D2** Arquitectura hexagonal — backend (15%) | 15% | 55 |
 | **D3** Frontend KMP: MVVM y buenas prácticas (10%) | 10% | N/A |
 | **D4** Integración y contrato (10%) | 10% | 40 |
@@ -63,7 +63,7 @@ Cada dimensión indica **qué mide**, **por qué importa** y **tu resultado**. C
 
 - **Qué mide:** Métricas orientadas a objetos (clases, métodos, campos, cohesión, acoplamiento, herencia) y proxies de SOLID, más patrones de diseño.
 - **Por qué importa:** El eje de la materia es el buen uso de la POO y su arquitectura: un diseño con clases claras y poco acopladas es más fácil de entender, probar y cambiar.
-- **Tu resultado:** **14/100**
+- **Tu resultado:** **16/100**
 - **Para investigar la causa:**
     - ¿Se pensó el modelo de clases antes de codificar o se agrupó después?
     - ¿Qué clases concentran muchas responsabilidades a la vez?
@@ -113,34 +113,48 @@ Cada dimensión indica **qué mide**, **por qué importa** y **tu resultado**. C
 
 ## 5. Señales detectadas
 
-El análisis encontró las siguientes señales (archivo, sin número de línea a propósito):
+El análisis encontró las siguientes señales, con el archivo y la línea donde se originan cuando están disponibles:
+
+**Archivos con más señales**
+
+| Archivo | Señales |
+|---|---:|
+| `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java` | 4 |
+| `src/main/java/ar/edu/um/appointment/auth/AuthService.java` | 2 |
+| `src/main/java/ar/edu/um/appointment/config/SecurityConfig.java` | 2 |
+| `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java` | 2 |
+| `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java` | 2 |
+| `src/main/java/ar/edu/um/appointment/auth/AuthController.java` | 1 |
+| `src/main/java/ar/edu/um/appointment/auth/TokenProvider.java` | 1 |
+| `src/main/java/ar/edu/um/appointment/config/JwtService.java` | 1 |
+| `src/main/java/ar/edu/um/appointment/web/errors/GlobalExceptionHandler.java` | 1 |
+| `src/test/java/ar/edu/um/appointment/auth/TokenProviderTest.java` | 1 |
 
 **DIP/concretos** (10)
-- clase 'AuthController' muy acoplada (CBO=15) — `src/main/java/ar/edu/um/appointment/auth/AuthController.java`
-- clase 'TokenProvider' muy acoplada (CBO=10) — `src/main/java/ar/edu/um/appointment/auth/TokenProvider.java`
-- clase 'AuthService' muy acoplada (CBO=14) — `src/main/java/ar/edu/um/appointment/auth/AuthService.java`
-- clase 'AuthService' instancia 4 concretos (CBO=14) — `src/main/java/ar/edu/um/appointment/auth/AuthService.java`
-- clase 'SecurityConfig' muy acoplada (CBO=15) — `src/main/java/ar/edu/um/appointment/config/SecurityConfig.java`
-- clase 'SecurityConfig' instancia 3 concretos (CBO=15) — `src/main/java/ar/edu/um/appointment/config/SecurityConfig.java`
-- clase 'CatalogServiceClient' muy acoplada (CBO=8) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java`
-- clase 'CatedraAppointmentsClient' muy acoplada (CBO=12) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java`
-- clase 'CatedraAppointmentsClient' instancia 5 concretos (CBO=12) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java`
-- clase 'GlobalExceptionHandler' muy acoplada (CBO=8) — `src/main/java/ar/edu/um/appointment/web/errors/GlobalExceptionHandler.java`
-
-**SRP/responsabilidad** (3)
-- clase 'AccountDTO' grande (LOC=10, métodos=0, campos=8) — `src/main/java/ar/edu/um/appointment/auth/AccountDTO.java`
-- clase 'ReservationProcess' con baja cohesión (29%) — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java`
-- método 'ReservationProcess.ReservationProcess' con 6 parámetros — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java`
+- clase 'AuthController' muy acoplada (CBO=15) — `src/main/java/ar/edu/um/appointment/auth/AuthController.java:14`
+- clase 'AuthService' muy acoplada (CBO=14) — `src/main/java/ar/edu/um/appointment/auth/AuthService.java:15`
+- clase 'AuthService' instancia 4 concretos (CBO=14) — `src/main/java/ar/edu/um/appointment/auth/AuthService.java:15`
+- clase 'TokenProvider' muy acoplada (CBO=10) — `src/main/java/ar/edu/um/appointment/auth/TokenProvider.java:15`
+- clase 'SecurityConfig' muy acoplada (CBO=15) — `src/main/java/ar/edu/um/appointment/config/SecurityConfig.java:21`
+- clase 'SecurityConfig' instancia 3 concretos (CBO=15) — `src/main/java/ar/edu/um/appointment/config/SecurityConfig.java:21`
+- clase 'CatalogServiceClient' muy acoplada (CBO=8) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:12`
+- clase 'CatedraAppointmentsClient' muy acoplada (CBO=12) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:13`
+- clase 'CatedraAppointmentsClient' instancia 5 concretos (CBO=12) — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:13`
+- clase 'GlobalExceptionHandler' muy acoplada (CBO=8) — `src/main/java/ar/edu/um/appointment/web/errors/GlobalExceptionHandler.java:12`
 
 **OCP/type-switch** (1)
-- clase 'JwtService' con 1 type-checks — `src/main/java/ar/edu/um/appointment/config/JwtService.java`
+- clase 'JwtService' con 1 type-checks — `src/main/java/ar/edu/um/appointment/config/JwtService.java:11`
+
+**SRP/responsabilidad** (2)
+- clase 'ReservationProcess' con baja cohesión (29%) — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java:5`
+- método 'ReservationProcess.ReservationProcess' con 6 parámetros — `src/main/java/ar/edu/um/appointment/turnos/domain/ReservationProcess.java:14`
 
 **duplicación** (5)
 - duplicación lógica: 6.6% · boilerplate: 9.8%
-- bloque de 8 líneas repetido 5 veces en src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:37, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:30, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:49 — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java`
-- bloque de 8 líneas repetido 5 veces en src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:36, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:29, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:48 — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java`
-- bloque de 8 líneas repetido 2 veces en src/test/java/ar/edu/um/appointment/auth/TokenProviderTest.java:14, src/test/java/ar/edu/um/appointment/config/SecurityConfigTest.java:20 — `src/test/java/ar/edu/um/appointment/auth/TokenProviderTest.java`
-- bloque de 8 líneas repetido 2 veces en src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:38, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:103 — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java`
+- bloque de 8 líneas repetido 5 veces en src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:36, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:29, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:48 — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:36`
+- bloque de 8 líneas repetido 5 veces en src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:37, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:30, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:49 — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:37`
+- bloque de 8 líneas repetido 2 veces en src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:38, src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatedraAppointmentsClient.java:103 — `src/main/java/ar/edu/um/appointment/turnos/infrastructure/client/CatalogServiceClient.java:38`
+- bloque de 8 líneas repetido 2 veces en src/test/java/ar/edu/um/appointment/auth/TokenProviderTest.java:14, src/test/java/ar/edu/um/appointment/config/SecurityConfigTest.java:20 — `src/test/java/ar/edu/um/appointment/auth/TokenProviderTest.java:14`
 
 **hexagonal** (2)
 - falta ports/in (hexagonal)
