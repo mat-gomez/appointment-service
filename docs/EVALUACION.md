@@ -3,7 +3,7 @@
 
 > Documento **generado automáticamente** por la cátedra de Programación II (UM): RepoSense + análisis de calidad de **7 dimensiones**. **No editar a mano**: se regenera en cada evaluación.
 > Rama evaluada: `main`. Análisis **heurístico** (regex + métricas) + build: es una criba para orientar la revisión, **no una nota**. La **documentación** del repositorio no se evalúa.
-> Generado: 2026-11-18.
+> Generado: 2026-11-20.
 
 ## 1. Veredicto
 
@@ -11,7 +11,7 @@
 |---|---|
 | Índice de calidad | **54/100** |
 | Tipo de repositorio | `backend` |
-| Build (`mvnw verify` / `gradlew check`) | no compila |
+| Build (`mvnw verify` / `gradlew check`) | tests fallan |
 | Código (LOC) | 1,580 |
 | Archivos de código | 48 |
 | Clases | 49 |
@@ -21,6 +21,8 @@
 | Duplicación lógica | 7.2% |
 | Duplicación de boilerplate | 9.8% |
 | Tope duro aplicado a D1 | `POO_BAJO` → D1 ≤ 60 |
+
+> **Build «tests fallan»:** el código **sí compila**; la verificación falló porque uno o más tests no pasaron (incluso después de un reintento). Revisá los reportes de Surefire/Failsafe del repositorio para identificar el test y el archivo involucrados.
 
 > Este informe **describe** lo que el análisis midió con los criterios ya establecidos de la materia. No es una nota.
 
