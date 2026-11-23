@@ -1,12 +1,15 @@
 package ar.edu.um.appointment.turnos.infrastructure.web;
 
 import ar.edu.um.appointment.turnos.application.ports.in.InitiateReservationUseCase;
+import ar.edu.um.appointment.turnos.application.ports.in.SubmitPhoneUseCase;
+import ar.edu.um.appointment.turnos.domain.model.AdditionalInformationSubmittedEvent;
 import ar.edu.um.appointment.turnos.domain.model.ReservationResponseDTO;
 import ar.edu.um.appointment.turnos.domain.model.ReserveAppointmentRequestDTO;
+import ar.edu.um.appointment.turnos.domain.model.SubmitPhoneRequestDTO;
 import ar.edu.um.appointment.web.errors.DomainException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -28,8 +31,15 @@ class AppointmentControllerTest {
     @Mock
     private InitiateReservationUseCase initiateReservationUseCase;
 
-    @InjectMocks
+    @Mock
+    private SubmitPhoneUseCase submitPhoneUseCase;
+
     private AppointmentController appointmentController;
+
+    @BeforeEach
+    void setUp() {
+        appointmentController = new AppointmentController(initiateReservationUseCase, submitPhoneUseCase);
+    }
 
     @Test
     void shouldReturnCreatedWhenReservationIsInitiated() {
@@ -70,5 +80,22 @@ class AppointmentControllerTest {
         assertThatThrownBy(() -> appointmentController.reserve(request, null, "Bearer jwt"))
                 .isInstanceOf(DomainException.class)
                 .satisfies(ex -> assertThat(((DomainException) ex).getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED));
+    }
+
+    @Test
+    void shouldAcceptPhoneSubmissionForAuthenticatedUser() {
+        AdditionalInformationSubmittedEvent expected = new AdditionalInformationSubmittedEvent(
+                "evt-phone-1", "proc-1", "+542615551234", Instant.now()
+        );
+        Principal principal = () -> "melina";
+        when(submitPhoneUseCase.submitPhone("proc-1", "+54 261 555-1234", "melina")).thenReturn(expected);
+
+        ResponseEntity<AdditionalInformationSubmittedEvent> response = appointmentController.submitPhone(
+                "proc-1", new SubmitPhoneRequestDTO("+54 261 555-1234"), principal
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getBody()).isEqualTo(expected);
+        verify(submitPhoneUseCase).submitPhone("proc-1", "+54 261 555-1234", "melina");
     }
 }
