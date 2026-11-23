@@ -43,7 +43,7 @@ public class AvailabilityService implements GetAvailabilityUseCase {
         List<WeeklyScheduleDTO> matchingSchedules = catalogSchedulePort
                 .fetchWeeklySchedules(professionalId, userJwt)
                 .stream()
-                .filter(s -> s.enabled() && s.dayOfWeek() == date.getDayOfWeek())
+                .filter(s -> s.enabled() && date.getDayOfWeek().equals(s.dayOfWeek()))
                 .toList();
 
         if (matchingSchedules.isEmpty()) {

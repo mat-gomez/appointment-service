@@ -84,4 +84,25 @@ class AvailabilityServiceTest {
         assertThat(result.availableSlots()).isEmpty();
         verifyNoInteractions(occupancyPort);
     }
+
+    @Test
+    void shouldIgnoreScheduleWithNonPositiveDurationAndBlockHoldWithoutExpiry() {
+        AvailabilityService defaultClockService = new AvailabilityService(catalogSchedulePort, occupancyPort);
+        WeeklyScheduleDTO invalidDuration = new WeeklyScheduleDTO(
+                306L, 202L, DayOfWeek.TUESDAY,
+                LocalTime.of(9, 0), LocalTime.of(10, 0), 0, true
+        );
+        WeeklyScheduleDTO valid = new WeeklyScheduleDTO(
+                307L, 202L, DayOfWeek.TUESDAY,
+                LocalTime.of(10, 0), LocalTime.of(10, 30), 30, true
+        );
+        when(catalogSchedulePort.fetchWeeklySchedules(202L, "jwt")).thenReturn(List.of(invalidDuration, valid));
+        when(occupancyPort.fetchOccupancies(202L, TUESDAY, TUESDAY)).thenReturn(List.of(
+                new OccupancyDTO(TUESDAY, LocalTime.of(10, 0), "HELD", null)
+        ));
+
+        AvailabilityResponseDTO result = defaultClockService.getAvailability(202L, TUESDAY, "jwt");
+
+        assertThat(result.availableSlots()).isEmpty();
+    }
 }
