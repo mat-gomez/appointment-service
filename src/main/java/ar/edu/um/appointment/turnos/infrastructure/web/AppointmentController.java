@@ -1,5 +1,6 @@
 package ar.edu.um.appointment.turnos.infrastructure.web;
 
+import ar.edu.um.appointment.turnos.application.ports.in.CancelReservationUseCase;
 import ar.edu.um.appointment.turnos.application.ports.in.InitiateReservationUseCase;
 import ar.edu.um.appointment.turnos.application.ports.in.QueryAppointmentsUseCase;
 import ar.edu.um.appointment.turnos.application.ports.in.SubmitPhoneUseCase;
@@ -33,27 +34,38 @@ public class AppointmentController {
     private final InitiateReservationUseCase initiateReservationUseCase;
     private final SubmitPhoneUseCase submitPhoneUseCase;
     private final QueryAppointmentsUseCase queryAppointmentsUseCase;
+    private final CancelReservationUseCase cancelReservationUseCase;
 
     public AppointmentController(InitiateReservationUseCase initiateReservationUseCase) {
-        this(initiateReservationUseCase, null, null);
+        this(initiateReservationUseCase, null, null, null);
     }
 
     public AppointmentController(
             InitiateReservationUseCase initiateReservationUseCase,
             SubmitPhoneUseCase submitPhoneUseCase
     ) {
-        this(initiateReservationUseCase, submitPhoneUseCase, null);
+        this(initiateReservationUseCase, submitPhoneUseCase, null, null);
+    }
+
+    public AppointmentController(
+            InitiateReservationUseCase initiateReservationUseCase,
+            SubmitPhoneUseCase submitPhoneUseCase,
+            QueryAppointmentsUseCase queryAppointmentsUseCase
+    ) {
+        this(initiateReservationUseCase, submitPhoneUseCase, queryAppointmentsUseCase, null);
     }
 
     @Autowired
     public AppointmentController(
             InitiateReservationUseCase initiateReservationUseCase,
             SubmitPhoneUseCase submitPhoneUseCase,
-            QueryAppointmentsUseCase queryAppointmentsUseCase
+            QueryAppointmentsUseCase queryAppointmentsUseCase,
+            CancelReservationUseCase cancelReservationUseCase
     ) {
         this.initiateReservationUseCase = initiateReservationUseCase;
         this.submitPhoneUseCase = submitPhoneUseCase;
         this.queryAppointmentsUseCase = queryAppointmentsUseCase;
+        this.cancelReservationUseCase = cancelReservationUseCase;
     }
 
     @PostMapping("/reserve")
@@ -95,6 +107,26 @@ public class AppointmentController {
     ) {
         String username = requireAuthenticatedUser(principal);
         return ResponseEntity.ok(queryAppointmentsUseCase.getReservationStatus(reservationProcessId, username));
+    }
+
+    @PostMapping("/{reservationProcessId}/cancel")
+    public ResponseEntity<ReservationDetailDTO> cancelReservation(
+            @PathVariable String reservationProcessId,
+            Principal principal,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader
+    ) {
+        String username = requireAuthenticatedUser(principal);
+        String jwt = extractJwt(authorizationHeader);
+        return ResponseEntity.ok(cancelReservationUseCase.cancelReservation(reservationProcessId, username, jwt));
+    }
+
+    @PostMapping("/{reservationProcessId}/abandon")
+    public ResponseEntity<ReservationDetailDTO> abandonReservation(
+            @PathVariable String reservationProcessId,
+            Principal principal
+    ) {
+        String username = requireAuthenticatedUser(principal);
+        return ResponseEntity.ok(cancelReservationUseCase.abandonReservation(reservationProcessId, username));
     }
 
     private String requireAuthenticatedUser(Principal principal) {
