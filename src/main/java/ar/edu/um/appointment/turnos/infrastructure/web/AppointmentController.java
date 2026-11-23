@@ -1,15 +1,19 @@
 package ar.edu.um.appointment.turnos.infrastructure.web;
 
 import ar.edu.um.appointment.turnos.application.ports.in.InitiateReservationUseCase;
+import ar.edu.um.appointment.turnos.application.ports.in.QueryAppointmentsUseCase;
 import ar.edu.um.appointment.turnos.application.ports.in.SubmitPhoneUseCase;
 import ar.edu.um.appointment.turnos.domain.model.AdditionalInformationSubmittedEvent;
+import ar.edu.um.appointment.turnos.domain.model.ReservationDetailDTO;
 import ar.edu.um.appointment.turnos.domain.model.ReservationResponseDTO;
 import ar.edu.um.appointment.turnos.domain.model.ReserveAppointmentRequestDTO;
 import ar.edu.um.appointment.turnos.domain.model.SubmitPhoneRequestDTO;
+import ar.edu.um.appointment.turnos.domain.model.UserReservationSummaryDTO;
 import ar.edu.um.appointment.web.errors.DomainException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -27,18 +32,28 @@ public class AppointmentController {
 
     private final InitiateReservationUseCase initiateReservationUseCase;
     private final SubmitPhoneUseCase submitPhoneUseCase;
+    private final QueryAppointmentsUseCase queryAppointmentsUseCase;
 
     public AppointmentController(InitiateReservationUseCase initiateReservationUseCase) {
-        this(initiateReservationUseCase, null);
+        this(initiateReservationUseCase, null, null);
+    }
+
+    public AppointmentController(
+            InitiateReservationUseCase initiateReservationUseCase,
+            SubmitPhoneUseCase submitPhoneUseCase
+    ) {
+        this(initiateReservationUseCase, submitPhoneUseCase, null);
     }
 
     @Autowired
     public AppointmentController(
             InitiateReservationUseCase initiateReservationUseCase,
-            SubmitPhoneUseCase submitPhoneUseCase
+            SubmitPhoneUseCase submitPhoneUseCase,
+            QueryAppointmentsUseCase queryAppointmentsUseCase
     ) {
         this.initiateReservationUseCase = initiateReservationUseCase;
         this.submitPhoneUseCase = submitPhoneUseCase;
+        this.queryAppointmentsUseCase = queryAppointmentsUseCase;
     }
 
     @PostMapping("/reserve")
@@ -65,6 +80,21 @@ public class AppointmentController {
         AdditionalInformationSubmittedEvent event =
                 submitPhoneUseCase.submitPhone(reservationProcessId, rawPhone, username);
         return ResponseEntity.accepted().body(event);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<UserReservationSummaryDTO>> getMyReservations(Principal principal) {
+        String username = requireAuthenticatedUser(principal);
+        return ResponseEntity.ok(queryAppointmentsUseCase.getMyReservations(username));
+    }
+
+    @GetMapping("/{reservationProcessId}")
+    public ResponseEntity<ReservationDetailDTO> getReservationStatus(
+            @PathVariable String reservationProcessId,
+            Principal principal
+    ) {
+        String username = requireAuthenticatedUser(principal);
+        return ResponseEntity.ok(queryAppointmentsUseCase.getReservationStatus(reservationProcessId, username));
     }
 
     private String requireAuthenticatedUser(Principal principal) {

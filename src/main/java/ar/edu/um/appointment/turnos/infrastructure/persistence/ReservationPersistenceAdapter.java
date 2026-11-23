@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -29,5 +30,15 @@ public class ReservationPersistenceAdapter implements ReservationPersistencePort
     @Override
     public ReservationEntity save(ReservationEntity entity) {
         return reservationRepository.save(entity);
+    }
+
+    @Override
+    public Optional<ReservationEntity> findByReservationId(String reservationId) {
+        return reservationRepository.findByReservationId(reservationId);
+    }
+
+    @Override
+    public List<ReservationEntity> findAllByUsername(String username) {
+        return reservationRepository.findAllByUsernameOrderByCreatedAtDesc(username);
     }
 }

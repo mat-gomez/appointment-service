@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -51,11 +52,18 @@ class ReservationPersistenceAdapterTest {
     }
 
     @Test
-    void shouldDelegateSaveToRepository() {
-        ReservationEntity entity = ReservationEntity.builder().reservationId("proc-1").build();
+    void shouldDelegateSaveFindByReservationIdAndFindAllByUsername() {
+        ReservationEntity entity = ReservationEntity.builder()
+                .reservationId("proc-1")
+                .username("melina")
+                .build();
         when(reservationRepository.save(entity)).thenReturn(entity);
+        when(reservationRepository.findByReservationId("proc-1")).thenReturn(Optional.of(entity));
+        when(reservationRepository.findAllByUsernameOrderByCreatedAtDesc("melina")).thenReturn(List.of(entity));
 
         assertThat(adapter.save(entity)).isSameAs(entity);
+        assertThat(adapter.findByReservationId("proc-1")).contains(entity);
+        assertThat(adapter.findAllByUsername("melina")).containsExactly(entity);
         verify(reservationRepository).save(entity);
     }
 }
