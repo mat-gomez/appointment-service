@@ -1,5 +1,6 @@
 package ar.edu.um.appointment.turnos.infrastructure.client;
 
+import ar.edu.um.appointment.turnos.domain.model.WeeklyScheduleDTO;
 import ar.edu.um.appointment.web.errors.DomainException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,71 +9,70 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class CatalogServiceClientTest {
 
-    private CatalogServiceClient catalogServiceClient;
-    private MockRestServiceServer mockServer;
+    private MockRestServiceServer server;
+    private CatalogServiceClient client;
 
     @BeforeEach
     void setUp() {
-        RestClient.Builder builder = RestClient.builder();
-        mockServer = MockRestServiceServer.bindTo(builder).build();
-        RestClient restClient = builder.baseUrl("http://localhost:8080").build();
-        catalogServiceClient = new CatalogServiceClient(restClient);
+        RestClient.Builder builder = RestClient.builder().baseUrl("http://localhost:8081");
+        server = MockRestServiceServer.bindTo(builder).build();
+        client = new CatalogServiceClient(builder.build());
     }
 
     @Test
-    void isProfessionalEnabled_ShouldReturnTrue_WhenServiceRespondsTrue() {
-        mockServer.expect(requestTo("http://localhost:8080/api/professionals/1/enabled"))
+    void shouldReturnTrueWhenProfessionalIsEnabled() {
+        server.expect(requestTo("http://localhost:8081/api/professionals/202/enabled"))
                 .andRespond(withSuccess("true", MediaType.APPLICATION_JSON));
 
-        boolean result = catalogServiceClient.isProfessionalEnabled(1L);
-
-        assertTrue(result);
-        mockServer.verify();
+        assertThat(client.isProfessionalEnabled(202L)).isTrue();
+        server.verify();
     }
 
     @Test
-    void isProfessionalEnabled_ShouldThrow503_WhenServiceFails() {
-        mockServer.expect(requestTo("http://localhost:8080/api/professionals/1/enabled"))
-                .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+    void shouldReturnWeeklySchedulesWithAuthorizationHeader() {
+        String json = """
+                [
+                  {
+                    "id": 303,
+                    "professionalId": 202,
+                    "dayOfWeek": "TUESDAY",
+                    "startTime": "09:00:00",
+                    "endTime": "11:00:00",
+                    "slotDurationMinutes": 30,
+                    "enabled": true
+                  }
+                ]
+                """;
+        server.expect(requestTo("http://localhost:8081/api/catalog/professionals/202/schedules"))
+                .andExpect(header("Authorization", "Bearer user-jwt"))
+                .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
 
-        DomainException exception = assertThrows(DomainException.class, () ->
-                catalogServiceClient.isProfessionalEnabled(1L)
-        );
+        List<WeeklyScheduleDTO> schedules = client.fetchWeeklySchedules(202L, "user-jwt");
 
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
-        assertEquals("CATALOG_SERVICE_UNAVAILABLE", exception.getMessage());
-        mockServer.verify();
+        assertThat(schedules).hasSize(1);
+        assertThat(schedules.get(0).id()).isEqualTo(303L);
+        server.verify();
     }
 
     @Test
-    void getWeeklySchedules_ShouldReturnData_WhenServiceResponds() {
-        mockServer.expect(requestTo("http://localhost:8080/api/professionals/1/weekly-schedules"))
-                .andRespond(withSuccess("[{\"day\":\"MONDAY\"}]", MediaType.APPLICATION_JSON));
+    void shouldThrowServiceUnavailableWhenCatalogFails() {
+        server.expect(requestTo("http://localhost:8081/api/professionals/202/enabled"))
+                .andRespond(withServerError());
 
-        Object result = catalogServiceClient.getWeeklySchedules(1L);
-
-        assertNotNull(result);
-        mockServer.verify();
-    }
-
-    @Test
-    void getWeeklySchedules_ShouldThrow503_WhenServiceFails() {
-        mockServer.expect(requestTo("http://localhost:8080/api/professionals/1/weekly-schedules"))
-                .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
-
-        DomainException exception = assertThrows(DomainException.class, () ->
-                catalogServiceClient.getWeeklySchedules(1L)
-        );
-
-        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, exception.getStatus());
-        assertEquals("CATALOG_SERVICE_UNAVAILABLE", exception.getMessage());
-        mockServer.verify();
+        assertThatThrownBy(() -> client.isProfessionalEnabled(202L))
+                .isInstanceOf(DomainException.class)
+                .satisfies(ex -> assertThat(((DomainException) ex).getStatus()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE));
+        server.verify();
     }
 }
