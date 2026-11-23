@@ -3,6 +3,7 @@ package ar.edu.um.appointment.turnos.infrastructure.persistence;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,7 +20,13 @@ public class ReservationEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String reservationId; // o processId de dominio
+    private String reservationId;
+
+    @Column(name = "username", length = 50)
+    private String username;
+
+    @Column(name = "hold_id", length = 100)
+    private String holdId;
 
     @Column(nullable = false)
     private Long professionalId;
@@ -30,6 +37,9 @@ public class ReservationEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReservationStatus status;
+
+    @Column(name = "expires_at")
+    private Instant expiresAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

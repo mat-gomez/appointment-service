@@ -1,6 +1,8 @@
 package ar.edu.um.appointment.turnos.infrastructure.client;
 
 import ar.edu.um.appointment.turnos.application.ports.out.OccupancyPort;
+import ar.edu.um.appointment.turnos.application.ports.out.ReservationHoldPort;
+import ar.edu.um.appointment.turnos.domain.model.HoldResultDTO;
 import ar.edu.um.appointment.turnos.domain.model.OccupancyDTO;
 import ar.edu.um.appointment.web.errors.DomainException;
 import lombok.RequiredArgsConstructor;
@@ -11,13 +13,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 @Component
 @RequiredArgsConstructor
-public class CatedraAppointmentsClient implements OccupancyPort {
+public class CatedraAppointmentsClient implements OccupancyPort, ReservationHoldPort {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String ERROR_CODE = "CATEDRA_SERVICE_UNAVAILABLE";
@@ -28,6 +33,8 @@ public class CatedraAppointmentsClient implements OccupancyPort {
     private String technicalToken;
 
     private record OccupanciesResponse(List<OccupancyDTO> occupancies) {}
+
+    private record HoldResponse(String holdId, Instant expiresAt) {}
 
     private String getAuthHeader(String token) {
         return "Bearer " + token;
@@ -50,6 +57,44 @@ public class CatedraAppointmentsClient implements OccupancyPort {
                 .retrieve()
                 .body(OccupanciesResponse.class), "Catedra service failed to respond to getOccupancies");
         return response != null && response.occupancies() != null ? response.occupancies() : List.of();
+    }
+
+    @Override
+    public HoldResultDTO createHold(Long professionalId, LocalDate date, LocalTime startTime, String reservationProcessId) {
+        Map<String, Object> body = Map.of(
+                "professionalId", professionalId,
+                "date", date.toString(),
+                "startTime", startTime.toString(),
+                "reservationProcessId", reservationProcessId
+        );
+        HoldResponse response = execute(() -> catedraRestClient.post()
+                .uri("/api/appointment-holds")
+                .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(HoldResponse.class), "Catedra service failed to create hold");
+        if (response == null || response.holdId() == null) {
+            throw new DomainException(ERROR_CODE, HttpStatus.SERVICE_UNAVAILABLE, "Catedra returned empty hold response");
+        }
+        return new HoldResultDTO(response.holdId(), response.expiresAt());
+    }
+
+    @Override
+    public void confirmHold(String holdId, String reservationProcessId) {
+        Map<String, Object> body = Map.of("reservationProcessId", reservationProcessId);
+        execute(() -> {
+            catedraRestClient.post()
+                    .uri("/api/appointment-holds/{holdId}/confirm", holdId)
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+            return null;
+        }, "Catedra service failed to confirm hold");
     }
 
     public Object getAppointmentOccupancies(String token, Long professionalId) {
