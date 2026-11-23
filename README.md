@@ -8,7 +8,7 @@ Detalle completo en [`docs/EVALUACION.md`](docs/EVALUACION.md).
 # appointment-service
 
 
-# 📅 SERVICIO DE GESTIÓN Y ORQUESTACIÓN DE TURNOS
+#  SERVICIO DE GESTIÓN Y ORQUESTACIÓN DE TURNOS
 
 > **Proyecto Integrador 2026 — Sistema Distribuido de Gestión de Turnos**
 
@@ -21,7 +21,7 @@ Detalle completo en [`docs/EVALUACION.md`](docs/EVALUACION.md).
 
 ---
 
-## 🚀 1. Descripción General
+##  1. Descripción General
 
 El **`appointment-service`** es el microservicio backend encargado de orquestar el ciclo de vida de las reservas de turnos bajo **Arquitectura Hexagonal** (puertos y adaptadores) en **Java 21 y Spring Boot 4.1.1**.
 
@@ -29,7 +29,7 @@ Coordina la creación y confirmación de reservas temporales (*holds*), la captu
 
 ---
 
-## 🏗️ 2. Arquitectura y Contratos entre Servicios
+##  2. Arquitectura y Contratos entre Servicios
 
 El módulo `ar.edu.um.appointment.turnos` separa estrictamente el dominio, la aplicación y la infraestructura:
 
@@ -78,7 +78,7 @@ Cliente / App KMP
 
 ---
 
-## 🔄 3. Máquina de Estados del Proceso de Reserva
+##  3. Máquina de Estados del Proceso de Reserva
 
 ```text
 [HOLD_CREATED] ──► [WAITING_FOR_PHONE] ──► [CONFIRMED] ──► [CANCELLED]
@@ -95,7 +95,7 @@ Cliente / App KMP
 
 ---
 
-## 🗄️ 4. Modelo de Datos (PostgreSQL + Flyway)
+## ️ 4. Modelo de Datos (PostgreSQL + Flyway)
 
 Definido en `src/main/resources/db/migration/V1__init_schema.sql`:
 
@@ -105,7 +105,7 @@ Definido en `src/main/resources/db/migration/V1__init_schema.sql`:
 
 ---
 
-## 🛡️ 5. Idempotencia, Seguridad y Recuperación
+##  5. Idempotencia, Seguridad y Recuperación
 
 * **Aislamiento y validación de estados:** Se verifica autenticación (`401`), titularidad del recurso (`403`), existencia (`404`) y validez de la transición (`409`).
 * **Idempotencia:** Cancelar o abandonar un proceso ya `CANCELLED` es idempotente; los eventos de Kafka se registran en `processed_kafka_event` por `event_id`.
@@ -113,7 +113,7 @@ Definido en `src/main/resources/db/migration/V1__init_schema.sql`:
 
 ---
 
-## ⚙️ 6. Variables de Entorno
+##  6. Variables de Entorno
 
 | Variable de Entorno | Descripción | Valor por defecto |
 | --- | --- | --- |
@@ -130,7 +130,7 @@ Definido en `src/main/resources/db/migration/V1__init_schema.sql`:
 
 ---
 
-## 🐳 7. Ejecución Local y con Docker Compose
+## 7. Ejecución Local y con Docker Compose
 
 ### Preparar entorno
 
