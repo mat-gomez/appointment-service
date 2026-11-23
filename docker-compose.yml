@@ -16,5 +16,43 @@ services:
       timeout: 5s
       retries: 5
 
+  appointment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: appointment-service
+    depends_on:
+      appointment-db:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8081
+      DB_HOST: appointment-db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-appointment_db}
+      DB_USER: ${DB_USER:-appointment_user}
+      DB_PASSWORD: ${DB_PASSWORD:-appointment_pass}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://appointment-db:5432/${DB_NAME:-appointment_db}
+      CATALOG_SERVICE_URL: ${CATALOG_SERVICE_URL:-http://localhost:8081}
+      CATEDRA_GROUP_ID: ${CATEDRA_GROUP_ID:-proyecto-melina-gomez}
+      CATEDRA_API_URL: ${CATEDRA_API_URL:-http://172.17.201.1:8090}
+      CATEDRA_JWT_TOKEN: ${CATEDRA_JWT_TOKEN:-}
+      CATEDRA_REDIS_HOST: ${CATEDRA_REDIS_HOST:-172.17.201.1}
+      CATEDRA_REDIS_PORT: ${CATEDRA_REDIS_PORT:-6379}
+      CATEDRA_REDIS_USER: ${CATEDRA_REDIS_USER:-}
+      CATEDRA_REDIS_PASSWORD: ${CATEDRA_REDIS_PASSWORD:-}
+      CATEDRA_KAFKA_SERVERS: ${CATEDRA_KAFKA_SERVERS:-172.17.201.1:9094}
+      CATEDRA_KAFKA_GROUP: ${CATEDRA_KAFKA_GROUP:-alumnos-proyecto-turnos}
+      CATEDRA_APPOINTMENT_ACTIONS_TOPIC: ${CATEDRA_APPOINTMENT_ACTIONS_TOPIC:-alumnos.turnos.acciones.proyecto-melina-gomez}
+      CATEDRA_APPOINTMENT_PHONE_TOPIC: ${CATEDRA_APPOINTMENT_PHONE_TOPIC:-catedra.turnos.telefono.proyecto-melina-gomez}
+      KAFKA_SERVERS: ${CATEDRA_KAFKA_SERVERS:-172.17.201.1:9094}
+      KAFKA_GROUP_ID: ${CATEDRA_KAFKA_GROUP:-alumnos-proyecto-turnos}
+      REDIS_HOST: ${CATEDRA_REDIS_HOST:-172.17.201.1}
+      REDIS_PORT: ${CATEDRA_REDIS_PORT:-6379}
+      REDIS_USERNAME: ${CATEDRA_REDIS_USER:-}
+      REDIS_PASSWORD: ${CATEDRA_REDIS_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:-defaultSecretKeyForTestingPurposesWithAtLeast512BitsLengthHereToSatisfyJJWTRequirementsForHS512AlgorithmAndProductionUse}
+    ports:
+      - "${SERVER_PORT:-8081}:8081"
+
 volumes:
   appointment_pgdata:
