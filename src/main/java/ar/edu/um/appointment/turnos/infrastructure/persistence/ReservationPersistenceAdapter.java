@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,5 +41,10 @@ public class ReservationPersistenceAdapter implements ReservationPersistencePort
     @Override
     public List<ReservationEntity> findAllByUsername(String username) {
         return reservationRepository.findAllByUsernameOrderByCreatedAtDesc(username);
+    }
+
+    @Override
+    public List<ReservationEntity> findAllByStatuses(Collection<ReservationStatus> statuses) {
+        return reservationRepository.findAllByStatusIn(statuses);
     }
 }

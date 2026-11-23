@@ -12,4 +12,5 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
     Optional<ReservationEntity> findByReservationId(String reservationId);
     List<ReservationEntity> findByUsernameAndStatusIn(String username, Collection<ReservationStatus> statuses);
     List<ReservationEntity> findAllByUsernameOrderByCreatedAtDesc(String username);
+    List<ReservationEntity> findAllByStatusIn(Collection<ReservationStatus> statuses);
 }

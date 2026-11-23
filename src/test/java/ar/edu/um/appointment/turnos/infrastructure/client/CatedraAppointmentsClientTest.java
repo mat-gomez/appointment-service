@@ -1,5 +1,6 @@
 package ar.edu.um.appointment.turnos.infrastructure.client;
 
+import ar.edu.um.appointment.turnos.domain.model.ExternalAppointmentDTO;
 import ar.edu.um.appointment.turnos.domain.model.HoldResultDTO;
 import ar.edu.um.appointment.turnos.domain.model.OccupancyDTO;
 import ar.edu.um.appointment.web.errors.DomainException;
@@ -95,6 +96,29 @@ class CatedraAppointmentsClientTest {
                 .andRespond(withStatus(HttpStatus.NO_CONTENT));
 
         client.cancelConfirmedAppointment("proc-99", "hold-99", "user-jwt");
+        server.verify();
+    }
+
+    @Test
+    void shouldFetchAppointmentsForReconciliation() {
+        String json = """
+                [
+                  {
+                    "id": "ext-1",
+                    "reservationProcessId": "proc-99",
+                    "holdId": "hold-99",
+                    "status": "CONFIRMED"
+                  }
+                ]
+                """;
+        server.expect(requestTo("http://localhost:8080/api/appointments"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(json, MediaType.APPLICATION_JSON));
+
+        List<ExternalAppointmentDTO> appointments = client.fetchAppointments();
+
+        assertThat(appointments).hasSize(1);
+        assertThat(appointments.get(0).reservationProcessId()).isEqualTo("proc-99");
         server.verify();
     }
 

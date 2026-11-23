@@ -52,18 +52,21 @@ class ReservationPersistenceAdapterTest {
     }
 
     @Test
-    void shouldDelegateSaveFindByReservationIdAndFindAllByUsername() {
+    void shouldDelegateSaveFindByReservationIdFindAllByUsernameAndFindAllByStatuses() {
         ReservationEntity entity = ReservationEntity.builder()
                 .reservationId("proc-1")
                 .username("melina")
                 .build();
+        List<ReservationStatus> statuses = List.of(ReservationStatus.HOLD_CREATED);
         when(reservationRepository.save(entity)).thenReturn(entity);
         when(reservationRepository.findByReservationId("proc-1")).thenReturn(Optional.of(entity));
         when(reservationRepository.findAllByUsernameOrderByCreatedAtDesc("melina")).thenReturn(List.of(entity));
+        when(reservationRepository.findAllByStatusIn(statuses)).thenReturn(List.of(entity));
 
         assertThat(adapter.save(entity)).isSameAs(entity);
         assertThat(adapter.findByReservationId("proc-1")).contains(entity);
         assertThat(adapter.findAllByUsername("melina")).containsExactly(entity);
+        assertThat(adapter.findAllByStatuses(statuses)).containsExactly(entity);
         verify(reservationRepository).save(entity);
     }
 }
