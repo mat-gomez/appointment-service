@@ -1,13 +1,16 @@
 package ar.edu.um.appointment.turnos.infrastructure.client;
 
+import ar.edu.um.appointment.turnos.application.ports.out.AppointmentReconciliationPort;
 import ar.edu.um.appointment.turnos.application.ports.out.CancelAppointmentPort;
 import ar.edu.um.appointment.turnos.application.ports.out.OccupancyPort;
 import ar.edu.um.appointment.turnos.application.ports.out.ReservationHoldPort;
+import ar.edu.um.appointment.turnos.domain.model.ExternalAppointmentDTO;
 import ar.edu.um.appointment.turnos.domain.model.HoldResultDTO;
 import ar.edu.um.appointment.turnos.domain.model.OccupancyDTO;
 import ar.edu.um.appointment.web.errors.DomainException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -23,7 +26,11 @@ import java.util.function.Supplier;
 
 @Component
 @RequiredArgsConstructor
-public class CatedraAppointmentsClient implements OccupancyPort, ReservationHoldPort, CancelAppointmentPort {
+public class CatedraAppointmentsClient implements
+        OccupancyPort,
+        ReservationHoldPort,
+        CancelAppointmentPort,
+        AppointmentReconciliationPort {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String ERROR_CODE = "CATEDRA_SERVICE_UNAVAILABLE";
@@ -111,6 +118,19 @@ public class CatedraAppointmentsClient implements OccupancyPort, ReservationHold
                     .toBodilessEntity();
             return null;
         }, "Catedra service failed to cancel appointment");
+    }
+
+    @Override
+    public List<ExternalAppointmentDTO> fetchAppointments() {
+        return execute(() -> {
+            List<ExternalAppointmentDTO> list = catedraRestClient.get()
+                    .uri("/api/appointments")
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<List<ExternalAppointmentDTO>>() {});
+            return list != null ? list : List.of();
+        }, "Catedra service failed to respond to getAppointments");
     }
 
     public Object getAppointmentOccupancies(String token, Long professionalId) {
