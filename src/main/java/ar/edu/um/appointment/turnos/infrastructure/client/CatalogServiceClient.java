@@ -7,40 +7,37 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import java.util.function.Supplier;
+
 @Component
 @RequiredArgsConstructor
 public class CatalogServiceClient {
 
+    private static final String ERROR_CODE = "CATALOG_SERVICE_UNAVAILABLE";
+    private static final String ERROR_MSG = "Catalog service is unavailable or failed to respond";
+
     private final RestClient catalogRestClient;
 
-    public boolean isProfessionalEnabled(Long professionalId) {
+    private <T> T execute(Supplier<T> call) {
         try {
-            Boolean enabled = catalogRestClient.get()
-                    .uri("/api/professionals/{id}/enabled", professionalId)
-                    .retrieve()
-                    .body(Boolean.class);
-            return Boolean.TRUE.equals(enabled);
+            return call.get();
         } catch (RestClientException e) {
-            throw new DomainException(
-                    "CATALOG_SERVICE_UNAVAILABLE",
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Catalog service is unavailable or failed to respond"
-            );
+            throw new DomainException(ERROR_CODE, HttpStatus.SERVICE_UNAVAILABLE, ERROR_MSG);
         }
     }
 
+    public boolean isProfessionalEnabled(Long professionalId) {
+        Boolean enabled = execute(() -> catalogRestClient.get()
+                .uri("/api/professionals/{id}/enabled", professionalId)
+                .retrieve()
+                .body(Boolean.class));
+        return Boolean.TRUE.equals(enabled);
+    }
+
     public Object getWeeklySchedules(Long professionalId) {
-        try {
-            return catalogRestClient.get()
-                    .uri("/api/professionals/{id}/weekly-schedules", professionalId)
-                    .retrieve()
-                    .body(Object.class);
-        } catch (RestClientException e) {
-            throw new DomainException(
-                    "CATALOG_SERVICE_UNAVAILABLE",
-                    HttpStatus.SERVICE_UNAVAILABLE,
-                    "Catalog service is unavailable or failed to respond"
-            );
-        }
+        return execute(() -> catalogRestClient.get()
+                .uri("/api/professionals/{id}/weekly-schedules", professionalId)
+                .retrieve()
+                .body(Object.class));
     }
 }
