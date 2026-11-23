@@ -1,5 +1,6 @@
 package ar.edu.um.appointment.turnos.infrastructure.client;
 
+import ar.edu.um.appointment.turnos.application.ports.out.CancelAppointmentPort;
 import ar.edu.um.appointment.turnos.application.ports.out.OccupancyPort;
 import ar.edu.um.appointment.turnos.application.ports.out.ReservationHoldPort;
 import ar.edu.um.appointment.turnos.domain.model.HoldResultDTO;
@@ -22,7 +23,7 @@ import java.util.function.Supplier;
 
 @Component
 @RequiredArgsConstructor
-public class CatedraAppointmentsClient implements OccupancyPort, ReservationHoldPort {
+public class CatedraAppointmentsClient implements OccupancyPort, ReservationHoldPort, CancelAppointmentPort {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String ERROR_CODE = "CATEDRA_SERVICE_UNAVAILABLE";
@@ -37,7 +38,8 @@ public class CatedraAppointmentsClient implements OccupancyPort, ReservationHold
     private record HoldResponse(String holdId, Instant expiresAt) {}
 
     private String getAuthHeader(String token) {
-        return "Bearer " + token;
+        String effectiveToken = (token != null && !token.isBlank()) ? token : technicalToken;
+        return "Bearer " + effectiveToken;
     }
 
     private <T> T execute(Supplier<T> call, String errorMessage) {
@@ -95,6 +97,20 @@ public class CatedraAppointmentsClient implements OccupancyPort, ReservationHold
                     .toBodilessEntity();
             return null;
         }, "Catedra service failed to confirm hold");
+    }
+
+    @Override
+    public void cancelConfirmedAppointment(String reservationProcessId, String holdId, String userJwt) {
+        String targetId = (holdId != null && !holdId.isBlank()) ? holdId : reservationProcessId;
+        execute(() -> {
+            catedraRestClient.delete()
+                    .uri("/api/appointments/{id}/cancel", targetId)
+                    .header(AUTHORIZATION_HEADER, getAuthHeader(userJwt))
+                    .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .toBodilessEntity();
+            return null;
+        }, "Catedra service failed to cancel appointment");
     }
 
     public Object getAppointmentOccupancies(String token, Long professionalId) {

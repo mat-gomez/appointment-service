@@ -1,5 +1,6 @@
 package ar.edu.um.appointment.turnos.infrastructure.web;
 
+import ar.edu.um.appointment.turnos.application.ports.in.CancelReservationUseCase;
 import ar.edu.um.appointment.turnos.application.ports.in.InitiateReservationUseCase;
 import ar.edu.um.appointment.turnos.application.ports.in.QueryAppointmentsUseCase;
 import ar.edu.um.appointment.turnos.application.ports.in.SubmitPhoneUseCase;
@@ -42,12 +43,18 @@ class AppointmentControllerTest {
     @Mock
     private QueryAppointmentsUseCase queryAppointmentsUseCase;
 
+    @Mock
+    private CancelReservationUseCase cancelReservationUseCase;
+
     private AppointmentController appointmentController;
 
     @BeforeEach
     void setUp() {
         appointmentController = new AppointmentController(
-                initiateReservationUseCase, submitPhoneUseCase, queryAppointmentsUseCase
+                initiateReservationUseCase,
+                submitPhoneUseCase,
+                queryAppointmentsUseCase,
+                cancelReservationUseCase
         );
     }
 
@@ -130,5 +137,26 @@ class AppointmentControllerTest {
         assertThat(myResponse.getBody()).containsExactly(summary);
         assertThat(detailResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(detailResponse.getBody()).isEqualTo(detail);
+    }
+
+    @Test
+    void shouldCancelAndAbandonReservationForAuthenticatedUser() {
+        Principal principal = () -> "melina";
+        LocalDateTime slot = LocalDateTime.of(2026, 11, 24, 9, 30);
+        ReservationDetailDTO cancelled = new ReservationDetailDTO(
+                "proc-1", "hold-1", 202L, slot, "CANCELLED", null
+        );
+        when(cancelReservationUseCase.cancelReservation("proc-1", "melina", "jwt-1")).thenReturn(cancelled);
+        when(cancelReservationUseCase.abandonReservation("proc-2", "melina")).thenReturn(cancelled);
+
+        ResponseEntity<ReservationDetailDTO> cancelRes =
+                appointmentController.cancelReservation("proc-1", principal, "Bearer jwt-1");
+        ResponseEntity<ReservationDetailDTO> abandonRes =
+                appointmentController.abandonReservation("proc-2", principal);
+
+        assertThat(cancelRes.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(cancelRes.getBody()).isEqualTo(cancelled);
+        assertThat(abandonRes.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(abandonRes.getBody()).isEqualTo(cancelled);
     }
 }

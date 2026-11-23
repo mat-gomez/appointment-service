@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
@@ -83,6 +84,17 @@ class CatedraAppointmentsClientTest {
         assertThat(hold.expiresAt()).isEqualTo(expiresAt);
 
         client.confirmHold("hold-99", "proc-99");
+        server.verify();
+    }
+
+    @Test
+    void shouldCancelConfirmedAppointmentPropagatingJwt() {
+        server.expect(requestTo("http://localhost:8080/api/appointments/hold-99/cancel"))
+                .andExpect(method(HttpMethod.DELETE))
+                .andExpect(header("Authorization", "Bearer user-jwt"))
+                .andRespond(withStatus(HttpStatus.NO_CONTENT));
+
+        client.cancelConfirmedAppointment("proc-99", "hold-99", "user-jwt");
         server.verify();
     }
 
