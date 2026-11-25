@@ -6,6 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public interface ReservationHoldPort {
-    HoldResultDTO createHold(Long professionalId, LocalDate date, LocalTime startTime, String reservationProcessId);
-    void confirmHold(String holdId, String reservationProcessId);
+    HoldResultDTO createHold(Long professionalId, LocalDate date, LocalTime startTime, String externalPatientId, String reservationProcessId);
+    String confirmHold(String holdId, String externalPatientId, String reservationProcessId);
 }

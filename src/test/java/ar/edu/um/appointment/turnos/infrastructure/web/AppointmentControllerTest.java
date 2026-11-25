@@ -102,7 +102,15 @@ class AppointmentControllerTest {
     @Test
     void shouldAcceptPhoneSubmissionForAuthenticatedUser() {
         AdditionalInformationSubmittedEvent expected = new AdditionalInformationSubmittedEvent(
-                "evt-phone-1", "proc-1", "+542615551234", Instant.now()
+                "evt-1",
+                "AdditionalInformationSubmitted",
+                "grupo-test",
+                "proc-1",
+                "hold-1",
+                "req-1",
+                new AdditionalInformationSubmittedEvent.PhoneInformation("+542615551234"),
+                Instant.parse("2026-11-23T18:00:00Z"),
+                1
         );
         Principal principal = () -> "melina";
         when(submitPhoneUseCase.submitPhone("proc-1", "+54 261 555-1234", "melina")).thenReturn(expected);

@@ -43,14 +43,17 @@ class AppointmentKafkaProducerTest {
                 kafkaTemplate,
                 reservationRepository,
                 TOPIC,
+                "grupo-test",
                 Clock.fixed(FIXED_NOW, ZoneOffset.UTC)
         );
     }
 
     @Test
-    void shouldNormalizePhoneAndPublishEventWithReservationKey() {
+    void shouldNormalizePhoneAndPublishEventWithReservationMetadata() {
         ReservationEntity entity = ReservationEntity.builder()
                 .reservationId("proc-100")
+                .holdId("hold-100")
+                .lastRequestEventId("req-evt-1")
                 .username("melina")
                 .build();
         when(reservationRepository.findByReservationId("proc-100")).thenReturn(Optional.of(entity));
@@ -58,11 +61,59 @@ class AppointmentKafkaProducerTest {
         AdditionalInformationSubmittedEvent event =
                 producer.submitPhone("proc-100", "+54 (261) 555-1234.", "melina");
 
-        assertThat(event.phone()).isEqualTo("+542615551234");
+        assertThat(event.eventType()).isEqualTo("AdditionalInformationSubmitted");
+        assertThat(event.groupId()).isEqualTo("grupo-test");
+        assertThat(event.holdId()).isEqualTo("hold-100");
+        assertThat(event.requestEventId()).isEqualTo("req-evt-1");
+        assertThat(event.information().phoneNumber()).isEqualTo("+542615551234");
         assertThat(event.reservationProcessId()).isEqualTo("proc-100");
         assertThat(event.occurredAt()).isEqualTo(FIXED_NOW);
-        assertThat(event.eventId()).isNotBlank();
+        assertThat(event.schemaVersion()).isEqualTo(1);
+        assertThat(event.eventId()).startsWith("phone-submitted-");
         verify(kafkaTemplate).send(TOPIC, "proc-100", event);
+    }
+
+    @Test
+    void shouldUseFallbackRequestEventIdWhenMissingOrBlankAndDeriveGroupIdFromTopic() {
+        AppointmentKafkaProducer derivedProducer = new AppointmentKafkaProducer(
+                kafkaTemplate,
+                reservationRepository,
+                "catedra.turnos.telefono.mi-grupo",
+                Clock.fixed(FIXED_NOW, ZoneOffset.UTC)
+        );
+        ReservationEntity entity = ReservationEntity.builder()
+                .reservationId("proc-101")
+                .holdId(null)
+                .lastRequestEventId("   ")
+                .username("melina")
+                .build();
+        when(reservationRepository.findByReservationId("proc-101")).thenReturn(Optional.of(entity));
+
+        AdditionalInformationSubmittedEvent event =
+                derivedProducer.submitPhone("proc-101", "2615551234", "melina");
+
+        assertThat(event.groupId()).isEqualTo("mi-grupo");
+        assertThat(event.holdId()).isEmpty();
+        assertThat(event.requestEventId()).isEqualTo("request-event-proc-101");
+        assertThat(event.information().phoneNumber()).isEqualTo("2615551234");
+    }
+
+    @Test
+    void shouldHandleBlankGroupIdAndMissingRepositoryOrReservation() {
+        AppointmentKafkaProducer fallbackGroupProducer = new AppointmentKafkaProducer(
+                kafkaTemplate,
+                null,
+                "custom.topic",
+                "  ",
+                Clock.fixed(FIXED_NOW, ZoneOffset.UTC)
+        );
+        AdditionalInformationSubmittedEvent event =
+                fallbackGroupProducer.submitPhone("proc-102", "+5492615551234", "melina");
+
+        assertThat(event.groupId()).isEqualTo("grupo-default");
+        assertThat(event.holdId()).isEmpty();
+        assertThat(event.requestEventId()).isEqualTo("request-event-proc-102");
+        verify(kafkaTemplate).send("custom.topic", "proc-102", event);
     }
 
     @Test

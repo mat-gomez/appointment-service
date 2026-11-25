@@ -14,7 +14,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ProblemDetail> handleDomainException(DomainException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(ex.getStatus(), ex.getMessage());
-        problemDetail.setType(URI.create("https://api.appointment.um.edu.ar/errors/" + ex.getCode().toLowerCase()));
+        String errorSlug = (ex.getCode() == null || ex.getCode().isBlank())
+                ? "domain-error"
+                : ex.getCode().trim().toLowerCase().replaceAll("[^a-z0-9_-]+", "-");
+        problemDetail.setType(URI.create("https://api.appointment.um.edu.ar/errors/" + errorSlug));
         problemDetail.setTitle(ex.getStatus().getReasonPhrase());
         problemDetail.setProperty("code", ex.getCode());
         return ResponseEntity.status(ex.getStatus()).body(problemDetail);

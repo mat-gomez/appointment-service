@@ -69,11 +69,12 @@ public class CatedraAppointmentsClient implements
     }
 
     @Override
-    public HoldResultDTO createHold(Long professionalId, LocalDate date, LocalTime startTime, String reservationProcessId) {
+    public HoldResultDTO createHold(Long professionalId, LocalDate date, LocalTime startTime, String externalPatientId, String reservationProcessId) {
         Map<String, Object> body = Map.of(
                 "professionalId", professionalId,
                 "date", date.toString(),
                 "startTime", startTime.toString(),
+                "externalPatientId", externalPatientId,
                 "reservationProcessId", reservationProcessId
         );
         HoldResponse response = execute(() -> catedraRestClient.post()
@@ -91,19 +92,25 @@ public class CatedraAppointmentsClient implements
     }
 
     @Override
-    public void confirmHold(String holdId, String reservationProcessId) {
-        Map<String, Object> body = Map.of("reservationProcessId", reservationProcessId);
-        execute(() -> {
-            catedraRestClient.post()
-                    .uri("/api/appointment-holds/{holdId}/confirm", holdId)
-                    .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
-                    .body(body)
-                    .retrieve()
-                    .toBodilessEntity();
-            return null;
-        }, "Catedra service failed to confirm hold");
+    public String confirmHold(String holdId, String externalPatientId, String reservationProcessId) {
+        record ConfirmHoldResponse(String reservationProcessId) {}
+        Map<String, Object> body = Map.of(
+                "reservationProcessId", reservationProcessId,
+                "externalPatientId", externalPatientId,
+                "patientFirstName", externalPatientId,
+                "patientLastName", externalPatientId
+        );
+        ConfirmHoldResponse response = execute(() -> catedraRestClient.post()
+                .uri("/api/appointment-holds/{holdId}/confirm", holdId)
+                .header(AUTHORIZATION_HEADER, getAuthHeader(technicalToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_PROBLEM_JSON, MediaType.APPLICATION_JSON)
+                .body(body)
+                .retrieve()
+                .body(ConfirmHoldResponse.class), "Catedra service failed to confirm hold");
+        return (response != null && response.reservationProcessId() != null && !response.reservationProcessId().isBlank())
+                ? response.reservationProcessId()
+                : reservationProcessId;
     }
 
     @Override

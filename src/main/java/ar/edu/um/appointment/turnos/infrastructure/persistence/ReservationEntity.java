@@ -28,6 +28,9 @@ public class ReservationEntity {
     @Column(name = "hold_id", length = 100)
     private String holdId;
 
+    @Column(name = "last_request_event_id", length = 100)
+    private String lastRequestEventId;
+
     @Column(nullable = false)
     private Long professionalId;
 

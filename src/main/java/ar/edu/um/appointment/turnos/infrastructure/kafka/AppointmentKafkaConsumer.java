@@ -44,6 +44,9 @@ public class AppointmentKafkaConsumer {
         ReservationStatus nextStatus = mapEventToStatus(event.eventType());
         if (nextStatus != null) {
             reservationRepository.findByReservationId(event.reservationProcessId()).ifPresent(reservation -> {
+                if ("AdditionalInformationRequested".equals(event.eventType())) {
+                    reservation.setLastRequestEventId(event.eventId());
+                }
                 reservation.setStatus(nextStatus);
                 reservationRepository.save(reservation);
             });

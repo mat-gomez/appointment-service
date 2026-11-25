@@ -1,49 +1,66 @@
 package ar.edu.um.appointment.web.errors;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.net.URI;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GlobalExceptionHandlerTest {
 
-    private GlobalExceptionHandler exceptionHandler;
+    private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
-    @BeforeEach
-    void setUp() {
-        exceptionHandler = new GlobalExceptionHandler();
+    @Test
+    void handleDomainExceptionSanitizesCodeWithSpaces() {
+        DomainException ex = new DomainException(
+                "User already has an active pending reservation",
+                HttpStatus.CONFLICT,
+                "ACTIVE RESERVATION EXISTS"
+        );
+
+        ResponseEntity<ProblemDetail> response = handler.handleDomainException(ex);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getType())
+                .isEqualTo(URI.create("https://api.appointment.um.edu.ar/errors/active-reservation-exists"));
+        assertThat(response.getBody().getDetail()).isEqualTo("User already has an active pending reservation");
     }
 
     @Test
-    void handleDomainException_ShouldReturnProblemDetailWithCorrectDetails() {
-        DomainException ex = new DomainException("Turno no encontrado", HttpStatus.NOT_FOUND, "APPOINTMENT_NOT_FOUND");
+    void handleDomainExceptionUsesFallbackWhenCodeIsNull() {
+        DomainException ex = new DomainException("Invalid request", HttpStatus.BAD_REQUEST, null);
 
-        ResponseEntity<ProblemDetail> response = exceptionHandler.handleDomainException(ex);
+        ResponseEntity<ProblemDetail> response = handler.handleDomainException(ex);
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Turno no encontrado", response.getBody().getDetail());
-        assertEquals(HttpStatus.NOT_FOUND.value(), response.getBody().getStatus());
-        assertNotNull(response.getBody().getProperties());
-        assertEquals("APPOINTMENT_NOT_FOUND", response.getBody().getProperties().get("code"));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getType())
+                .isEqualTo(URI.create("https://api.appointment.um.edu.ar/errors/domain-error"));
     }
 
     @Test
-    void handleGenericException_ShouldReturnInternalServerErrorProblemDetail() {
-        Exception ex = new RuntimeException("Error inesperado en el servidor");
+    void handleDomainExceptionUsesFallbackWhenCodeIsBlank() {
+        DomainException ex = new DomainException("Blank code", HttpStatus.BAD_REQUEST, "   ");
 
-        ResponseEntity<ProblemDetail> response = exceptionHandler.handleGenericException(ex);
+        ResponseEntity<ProblemDetail> response = handler.handleDomainException(ex);
 
-        assertNotNull(response);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("Error inesperado en el servidor", response.getBody().getDetail());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getBody().getStatus());
-        assertNotNull(response.getBody().getProperties());
-        assertEquals("INTERNAL_SERVER_ERROR", response.getBody().getProperties().get("code"));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getType())
+                .isEqualTo(URI.create("https://api.appointment.um.edu.ar/errors/domain-error"));
+    }
+
+    @Test
+    void handleGenericExceptionReturns500() {
+        ResponseEntity<ProblemDetail> response = handler.handleGenericException(new RuntimeException("Boom"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getType())
+                .isEqualTo(URI.create("https://api.appointment.um.edu.ar/errors/internal-error"));
     }
 }

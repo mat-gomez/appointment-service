@@ -65,7 +65,7 @@ class CatedraAppointmentsClientTest {
     }
 
     @Test
-    void shouldCreateAndConfirmHold() {
+    void shouldCreateAndConfirmHoldReturningConfirmedProcessId() {
         LocalDate date = LocalDate.of(2026, 11, 24);
         LocalTime time = LocalTime.of(9, 30);
         Instant expiresAt = Instant.parse("2026-11-24T12:35:00Z");
@@ -78,13 +78,29 @@ class CatedraAppointmentsClientTest {
                 ));
         server.expect(requestTo("http://localhost:8080/api/appointment-holds/hold-99/confirm"))
                 .andExpect(method(HttpMethod.POST))
-                .andRespond(withStatus(HttpStatus.OK));
+                .andRespond(withStatus(HttpStatus.ACCEPTED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"reservationProcessId\":\"process-99\",\"status\":\"WAITING_FOR_PHONE\"}"));
 
-        HoldResultDTO hold = client.createHold(202L, date, time, "proc-99");
+        HoldResultDTO hold = client.createHold(202L, date, time, "patient-99", "proc-99");
         assertThat(hold.holdId()).isEqualTo("hold-99");
         assertThat(hold.expiresAt()).isEqualTo(expiresAt);
 
-        client.confirmHold("hold-99", "proc-99");
+        String confirmedId = client.confirmHold("hold-99", "patient-99", "proc-99");
+        assertThat(confirmedId).isEqualTo("process-99");
+        server.verify();
+    }
+
+    @Test
+    void shouldFallbackToOriginalProcessIdWhenConfirmResponseHasNoProcessId() {
+        server.expect(requestTo("http://localhost:8080/api/appointment-holds/hold-99/confirm"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withStatus(HttpStatus.ACCEPTED)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{}"));
+
+        String confirmedId = client.confirmHold("hold-99", "patient-99", "proc-99");
+        assertThat(confirmedId).isEqualTo("proc-99");
         server.verify();
     }
 
@@ -130,7 +146,7 @@ class CatedraAppointmentsClientTest {
         server.expect(requestTo("http://localhost:8080/api/appointment-holds"))
                 .andRespond(withServerError());
 
-        assertThatThrownBy(() -> client.createHold(202L, date, time, "proc-99"))
+        assertThatThrownBy(() -> client.createHold(202L, date, time, "patient-99", "proc-99"))
                 .isInstanceOf(DomainException.class)
                 .satisfies(ex -> assertThat(((DomainException) ex).getStatus()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE));
         server.verify();
