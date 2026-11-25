@@ -4,7 +4,14 @@ import java.time.Instant;
 
 public record AdditionalInformationSubmittedEvent(
         String eventId,
+        String eventType,
+        String groupId,
         String reservationProcessId,
-        String phone,
-        Instant occurredAt
-) {}
+        String holdId,
+        String requestEventId,
+        PhoneInformation information,
+        Instant occurredAt,
+        int schemaVersion
+) {
+    public record PhoneInformation(String phoneNumber) {}
+}

@@ -43,6 +43,7 @@ class AppointmentKafkaProducerTest {
                 kafkaTemplate,
                 reservationRepository,
                 TOPIC,
+                "grupo-test",
                 Clock.fixed(FIXED_NOW, ZoneOffset.UTC)
         );
     }
@@ -51,6 +52,8 @@ class AppointmentKafkaProducerTest {
     void shouldNormalizePhoneAndPublishEventWithReservationKey() {
         ReservationEntity entity = ReservationEntity.builder()
                 .reservationId("proc-100")
+                .holdId("hold-100")
+                .lastRequestEventId("req-evt-1")
                 .username("melina")
                 .build();
         when(reservationRepository.findByReservationId("proc-100")).thenReturn(Optional.of(entity));
@@ -58,9 +61,14 @@ class AppointmentKafkaProducerTest {
         AdditionalInformationSubmittedEvent event =
                 producer.submitPhone("proc-100", "+54 (261) 555-1234.", "melina");
 
-        assertThat(event.phone()).isEqualTo("+542615551234");
+        assertThat(event.eventType()).isEqualTo("AdditionalInformationSubmitted");
+        assertThat(event.groupId()).isEqualTo("grupo-test");
+        assertThat(event.holdId()).isEqualTo("hold-100");
+        assertThat(event.requestEventId()).isEqualTo("req-evt-1");
+        assertThat(event.information().phoneNumber()).isEqualTo("+542615551234");
         assertThat(event.reservationProcessId()).isEqualTo("proc-100");
         assertThat(event.occurredAt()).isEqualTo(FIXED_NOW);
+        assertThat(event.schemaVersion()).isEqualTo(1);
         assertThat(event.eventId()).isNotBlank();
         verify(kafkaTemplate).send(TOPIC, "proc-100", event);
     }

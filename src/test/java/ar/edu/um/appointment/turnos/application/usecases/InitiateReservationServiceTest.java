@@ -72,6 +72,8 @@ class InitiateReservationServiceTest {
         when(catalogSchedulePort.fetchWeeklySchedules(202L, "jwt")).thenReturn(List.of(schedule));
         when(reservationHoldPort.createHold(eq(202L), eq(TUESDAY), eq(LocalTime.of(9, 30)), eq("melina"), anyString()))
                 .thenReturn(new HoldResultDTO("hold-123", expiresAt));
+        when(reservationHoldPort.confirmHold(eq("hold-123"), eq("melina"), anyString()))
+                .thenReturn("process-catedra-123");
         when(reservationPersistencePort.save(any(ReservationEntity.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
 
@@ -81,9 +83,31 @@ class InitiateReservationServiceTest {
         assertThat(response.professionalId()).isEqualTo(202L);
         assertThat(response.status()).isEqualTo(ReservationStatus.WAITING_FOR_PHONE.name());
         assertThat(response.expiresAt()).isEqualTo(expiresAt);
-        assertThat(response.reservationProcessId()).isNotBlank();
-        verify(reservationHoldPort).confirmHold("hold-123", "melina", response.reservationProcessId());
+        assertThat(response.reservationProcessId()).isEqualTo("process-catedra-123");
         verify(reservationPersistencePort, times(2)).save(any(ReservationEntity.class));
+    }
+
+    @Test
+    void shouldKeepGeneratedProcessIdWhenConfirmHoldReturnsBlank() {
+        ReserveAppointmentRequestDTO request = new ReserveAppointmentRequestDTO(202L, TUESDAY, LocalTime.of(9, 30));
+        WeeklyScheduleDTO schedule = new WeeklyScheduleDTO(
+                303L, 202L, DayOfWeek.TUESDAY, LocalTime.of(9, 0), LocalTime.of(11, 0), 30, true
+        );
+        Instant expiresAt = FIXED_NOW.plusSeconds(300);
+
+        when(reservationPersistencePort.hasActivePendingReservation("melina", FIXED_NOW)).thenReturn(false);
+        when(catalogSchedulePort.fetchWeeklySchedules(202L, "jwt")).thenReturn(List.of(schedule));
+        when(reservationHoldPort.createHold(eq(202L), eq(TUESDAY), eq(LocalTime.of(9, 30)), eq("melina"), anyString()))
+                .thenReturn(new HoldResultDTO("hold-123", expiresAt));
+        when(reservationHoldPort.confirmHold(eq("hold-123"), eq("melina"), anyString()))
+                .thenReturn("  ");
+        when(reservationPersistencePort.save(any(ReservationEntity.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        ReservationResponseDTO response = service.initiateReservation(request, "melina", "jwt");
+
+        assertThat(response.reservationProcessId()).isNotBlank().doesNotContain(" ");
+        assertThat(response.status()).isEqualTo(ReservationStatus.WAITING_FOR_PHONE.name());
     }
 
     @Test
