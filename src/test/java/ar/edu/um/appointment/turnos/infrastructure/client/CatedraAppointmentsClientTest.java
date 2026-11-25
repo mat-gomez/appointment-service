@@ -80,11 +80,11 @@ class CatedraAppointmentsClientTest {
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withStatus(HttpStatus.OK));
 
-        HoldResultDTO hold = client.createHold(202L, date, time, "proc-99");
+        HoldResultDTO hold = client.createHold(202L, date, time, "patient-99", "proc-99");
         assertThat(hold.holdId()).isEqualTo("hold-99");
         assertThat(hold.expiresAt()).isEqualTo(expiresAt);
 
-        client.confirmHold("hold-99", "proc-99");
+        client.confirmHold("hold-99", "patient-99", "proc-99");
         server.verify();
     }
 
@@ -130,7 +130,7 @@ class CatedraAppointmentsClientTest {
         server.expect(requestTo("http://localhost:8080/api/appointment-holds"))
                 .andRespond(withServerError());
 
-        assertThatThrownBy(() -> client.createHold(202L, date, time, "proc-99"))
+        assertThatThrownBy(() -> client.createHold(202L, date, time, "patient-99", "proc-99"))
                 .isInstanceOf(DomainException.class)
                 .satisfies(ex -> assertThat(((DomainException) ex).getStatus()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE));
         server.verify();

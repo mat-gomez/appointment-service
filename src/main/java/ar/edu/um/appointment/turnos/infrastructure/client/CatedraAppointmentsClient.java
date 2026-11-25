@@ -69,11 +69,12 @@ public class CatedraAppointmentsClient implements
     }
 
     @Override
-    public HoldResultDTO createHold(Long professionalId, LocalDate date, LocalTime startTime, String reservationProcessId) {
+    public HoldResultDTO createHold(Long professionalId, LocalDate date, LocalTime startTime, String externalPatientId, String reservationProcessId) {
         Map<String, Object> body = Map.of(
                 "professionalId", professionalId,
                 "date", date.toString(),
                 "startTime", startTime.toString(),
+                "externalPatientId", externalPatientId,
                 "reservationProcessId", reservationProcessId
         );
         HoldResponse response = execute(() -> catedraRestClient.post()
@@ -91,8 +92,13 @@ public class CatedraAppointmentsClient implements
     }
 
     @Override
-    public void confirmHold(String holdId, String reservationProcessId) {
-        Map<String, Object> body = Map.of("reservationProcessId", reservationProcessId);
+    public void confirmHold(String holdId, String externalPatientId, String reservationProcessId) {
+        Map<String, Object> body = Map.of(
+                "reservationProcessId", reservationProcessId,
+                "externalPatientId", externalPatientId,
+                "patientFirstName", externalPatientId,
+                "patientLastName", externalPatientId
+        );
         execute(() -> {
             catedraRestClient.post()
                     .uri("/api/appointment-holds/{holdId}/confirm", holdId)

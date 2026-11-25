@@ -74,6 +74,7 @@ public class InitiateReservationService implements InitiateReservationUseCase {
                 request.professionalId(),
                 request.date(),
                 request.startTime(),
+                username,
                 reservationProcessId
         );
 
@@ -88,7 +89,7 @@ public class InitiateReservationService implements InitiateReservationUseCase {
                 .build();
         entity = reservationPersistencePort.save(entity);
 
-        reservationHoldPort.confirmHold(hold.holdId(), reservationProcessId);
+        reservationHoldPort.confirmHold(hold.holdId(), username, reservationProcessId);
         entity.setStatus(ReservationStatus.WAITING_FOR_PHONE);
         entity = reservationPersistencePort.save(entity);
 

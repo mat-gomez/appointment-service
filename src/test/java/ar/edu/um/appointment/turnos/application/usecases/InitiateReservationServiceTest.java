@@ -70,7 +70,7 @@ class InitiateReservationServiceTest {
 
         when(reservationPersistencePort.hasActivePendingReservation("melina", FIXED_NOW)).thenReturn(false);
         when(catalogSchedulePort.fetchWeeklySchedules(202L, "jwt")).thenReturn(List.of(schedule));
-        when(reservationHoldPort.createHold(eq(202L), eq(TUESDAY), eq(LocalTime.of(9, 30)), anyString()))
+        when(reservationHoldPort.createHold(eq(202L), eq(TUESDAY), eq(LocalTime.of(9, 30)), eq("melina"), anyString()))
                 .thenReturn(new HoldResultDTO("hold-123", expiresAt));
         when(reservationPersistencePort.save(any(ReservationEntity.class)))
                 .thenAnswer(inv -> inv.getArgument(0));
@@ -82,7 +82,7 @@ class InitiateReservationServiceTest {
         assertThat(response.status()).isEqualTo(ReservationStatus.WAITING_FOR_PHONE.name());
         assertThat(response.expiresAt()).isEqualTo(expiresAt);
         assertThat(response.reservationProcessId()).isNotBlank();
-        verify(reservationHoldPort).confirmHold("hold-123", response.reservationProcessId());
+        verify(reservationHoldPort).confirmHold("hold-123", "melina", response.reservationProcessId());
         verify(reservationPersistencePort, times(2)).save(any(ReservationEntity.class));
     }
 
