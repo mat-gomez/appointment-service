@@ -89,7 +89,10 @@ public class InitiateReservationService implements InitiateReservationUseCase {
                 .build();
         entity = reservationPersistencePort.save(entity);
 
-        reservationHoldPort.confirmHold(hold.holdId(), username, reservationProcessId);
+        String confirmedProcessId = reservationHoldPort.confirmHold(hold.holdId(), username, reservationProcessId);
+        if (confirmedProcessId != null && !confirmedProcessId.isBlank()) {
+            entity.setReservationId(confirmedProcessId);
+        }
         entity.setStatus(ReservationStatus.WAITING_FOR_PHONE);
         entity = reservationPersistencePort.save(entity);
 

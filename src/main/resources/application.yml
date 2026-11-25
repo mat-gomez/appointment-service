@@ -31,6 +31,12 @@ spring:
         spring.json.add.type.headers: false
     consumer:
       group-id: ${KAFKA_GROUP_ID:${CATEDRA_KAFKA_GROUP:alumnos-proyecto-turnos}}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: ar.edu.um.appointment.turnos.domain.model.AppointmentKafkaEventDTO
+        spring.json.use.type.headers: false
   data:
     redis:
       host: ${REDIS_HOST:${CATEDRA_REDIS_HOST:172.17.201.1}}
